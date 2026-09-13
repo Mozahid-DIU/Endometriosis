@@ -67,7 +67,7 @@ Full write-ups: [docs/methodology.md](docs/methodology.md) · [docs/literature_r
 ├── scripts/
 │   └── prep_dataset.py        # builds the balanced, case-wise split dataset (+ lesion masks, manifest)
 ├── notebooks/
-│   └── Endometriosis.ipynb    # Colab: training (ResNet50, EfficientNet-B0, ViT-B/16) + test evaluation
+│   └── Endometriosis.ipynb    # Colab: training, test evaluation, Grad-CAM IoU / Pointing Game / Coverage
 ├── data/
 │   └── manifest.csv           # exact file → class → case/video → split assignment (reproducibility)
 ├── results/                   # metrics CSVs + figures used in the paper
@@ -88,7 +88,7 @@ Full write-ups: [docs/methodology.md](docs/methodology.md) · [docs/literature_r
    python scripts/prep_dataset.py      # -> data/{train,val,test}/..., data/masks/, data/manifest.csv
    ```
    Zip `data/` as `glenda_balanced.zip`.
-3. **Train and evaluate.** Open `notebooks/Endometriosis.ipynb` in Google Colab with a T4 GPU, upload the zip, and run all cells.
+3. **Train, evaluate and explain.** Open `notebooks/Endometriosis.ipynb` in Google Colab with a T4 GPU, upload the zip, and run all cells. The notebook trains the three models, evaluates them on the test set, and runs the Grad-CAM localization analysis. Saved outputs from the reported run are kept in the notebook.
 
 > Results can differ slightly between runs (about ±0.02 AUC) because cuDNN is not fully deterministic.
 
@@ -97,7 +97,6 @@ Full write-ups: [docs/methodology.md](docs/methodology.md) · [docs/literature_r
 - [x] Balanced, leakage-free dataset construction
 - [x] CNN vs. ViT training and test-set evaluation
 - [x] Grad-CAM vs. ground-truth mask localization metrics
-- [ ] Upload the Grad-CAM / IoU evaluation notebook
 - [ ] 5-fold grouped cross-validation
 - [ ] Statistical significance: McNemar's test and 95% CI for AUC
 - [ ] Attention-rollout explanations for ViT
