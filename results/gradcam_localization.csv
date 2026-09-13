@@ -1,0 +1,4 @@
+,PointingGame,Coverage
+ResNet50,0.2642,0.1645
+EfficientNet-B0,0.4528,0.2124
+ViT-B/16,0.0189,0.0688

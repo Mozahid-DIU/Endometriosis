@@ -1,0 +1,167 @@
+<mxfile host="65bd71144e">
+    <diagram id="methodology" name="Methodology">
+        <mxGraphModel dx="1628" dy="1048" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1050" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="band1" value="" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#1B2A4A;strokeWidth=3;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="40" width="1420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="band1title" value="Data Processing and&#xa;Feature Preparation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F3864;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;horizontal=0;" parent="1" vertex="1">
+                    <mxGeometry x="52" y="55" width="46" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_ds" value="GLENDA v1.5&#xa;Laparoscopy Images&#xa;&#xa;373 Endometriosis&#xa;13,438 No-pathology" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF1F7;strokeColor=#1B2A4A;dashed=1;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="110" width="180" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_dslabel" value="Dataset Collection" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="278" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_proc" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9DB2C8;dashed=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="95" width="230" height="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_p1" value="Binary Labeling&#xa;(Endometriosis / Normal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F7A8C;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="375" y="110" width="200" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_p2" value="Resize to 224 x 224" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B6B8F;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="375" y="165" width="200" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_p3" value="ImageNet Normalization" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F3864;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="375" y="220" width="200" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_proclabel" value="Data Processing" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="288" width="230" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_bal" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9DB2C8;dashed=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="650" y="95" width="250" height="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_b1" value="Undersampling&#xa;(Balanced 373 vs 373)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E8B9E;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="665" y="115" width="220" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_b2" value="Augmentation&#xa;Flip / Rotation / Jitter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16435A;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="665" y="185" width="220" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_ballabel" value="Data Balancing (image-based)" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="650" y="288" width="250" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_split" value="Split Data&#xa;Train 70% / Val 15% / Test 15%&#xa;+ 5-Fold Cross-Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF1F7;strokeColor=#1B2A4A;dashed=1;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="130" width="200" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1_splitlabel" value="Data Splitting" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="278" width="200" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" style="endArrow=block;html=1;strokeColor=#1F7A8C;strokeWidth=2;fontSize=16;" parent="1" source="b1_ds" target="b1_proc" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2" style="endArrow=block;html=1;strokeColor=#1F7A8C;strokeWidth=2;fontSize=16;" parent="1" source="b1_proc" target="b1_bal" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a3" style="endArrow=block;html=1;strokeColor=#1F7A8C;strokeWidth=2;fontSize=16;" parent="1" source="b1_bal" target="b1_split" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="band2" value="" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#1B2A4A;strokeWidth=3;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="370" width="1420" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="band2title" value="Model Preparation&#xa;and Evaluation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F3864;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;horizontal=0;" parent="1" vertex="1">
+                    <mxGeometry x="52" y="385" width="46" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_mdl" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9DB2C8;dashed=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="420" width="230" height="205" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_m1" value="ResNet50  (CNN)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6A3D9A;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="135" y="440" width="200" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_m2" value="EfficientNet-B0  (CNN)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8E5FB0;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="135" y="495" width="200" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_m3" value="ViT-Base/16  (Transformer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B08FD0;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="135" y="550" width="200" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_mdllabel" value="Transfer-Learning Models" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="628" width="230" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_cv" value="5-Fold&#xa;Cross-Validation&#xa;&#xa;Train Fold  |  Validation Fold" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF1F7;strokeColor=#1B2A4A;dashed=1;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="450" width="240" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_cvlabel" value="Cross-Validation" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="628" width="240" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_eval" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9DB2C8;dashed=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="420" width="430" height="205" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_e1" value="Accuracy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3E7CB1;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="745" y="440" width="190" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_e2" value="Precision" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F3864;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="745" y="490" width="190" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_e3" value="Recall / Sensitivity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F7A8C;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="745" y="540" width="190" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_e4" value="F1-Score" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E8B9E;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="440" width="185" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_e5" value="ROC-AUC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16435A;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="490" width="185" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_e6" value="Confusion Matrix + ROC Curve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3D5A80;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="540" width="185" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="b2_evallabel" value="Model Evaluation" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="628" width="430" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="a4" style="endArrow=block;html=1;strokeColor=#6A3D9A;strokeWidth=2;fontSize=16;" parent="1" source="b2_mdl" target="b2_cv" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a5" style="endArrow=block;html=1;strokeColor=#6A3D9A;strokeWidth=2;fontSize=16;" parent="1" source="b2_cv" target="b2_eval" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_link" style="endArrow=block;html=1;strokeColor=#1B2A4A;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontSize=16;" parent="1" source="b1_split" target="b2_eval" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1060" y="355"/>
+                            <mxPoint x="945" y="355"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="band3" value="" style="rounded=1;arcSize=3;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#16697A;strokeWidth=3;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="700" width="1420" height="290" as="geometry"/>
+                </mxCell>
+                <mxCell id="band3title" value="Explainability (XAI)&#xa;and Output" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16697A;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=16;horizontal=0;" parent="1" vertex="1">
+                    <mxGeometry x="52" y="715" width="46" height="260" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3_gc" value="Grad-CAM Heatmaps&#xa;&#xa;Lesion-region visualization&#xa;(CNN + ViT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF1F7;strokeColor=#16697A;dashed=1;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="760" width="240" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3_gclabel" value="Explainable AI (Grad-CAM)" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="915" width="240" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3_best" value="Best Model Selection&#xa;&amp;amp;&#xa;CNN vs Transformer Comparison" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E8B9E;strokeColor=none;fontColor=#FFFFFF;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="775" width="260" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3_bestlabel" value="Comparative Analysis" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="915" width="260" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3_out" value="Conclusion&#xa;&#xa;(Optional) Web Deployment&#xa;for Clinical Screening" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF1F7;strokeColor=#16697A;dashed=1;fontSize=16;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="980" y="775" width="240" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="b3_outlabel" value="Output" style="text;html=1;fontStyle=1;fontSize=16;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="980" y="915" width="240" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="a6" style="endArrow=block;html=1;strokeColor=#16697A;strokeWidth=2;fontSize=16;" parent="1" source="b3_gc" target="b3_best" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a7" style="endArrow=block;html=1;strokeColor=#16697A;strokeWidth=2;fontSize=16;" parent="1" source="b3_best" target="b3_out" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_link2" style="endArrow=block;html=1;strokeColor=#16697A;strokeWidth=2;exitX=0.5;exitY=1;entryX=0.5;entryY=0;fontSize=16;" parent="1" source="b2_eval" target="b3_gc" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="945" y="685"/>
+                            <mxPoint x="270" y="685"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

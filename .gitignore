@@ -1,0 +1,34 @@
+# --- Dataset (GLENDA, CC BY-NC 4.0) — download from the official source, do not redistribute ---
+Dataset/
+glenda_balanced/
+glenda_balanced.zip
+data/*
+!data/manifest.csv
+
+# --- Model weights ---
+*.pth
+*.pt
+*.ckpt
+
+# --- Paper draft (unpublished, work in progress) ---
+paper/
+
+# --- Early prototype, superseded by notebooks/Endometriosis.ipynb ---
+endometriosis_transfer_learning.py
+
+# --- Python / Jupyter ---
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.bkp
+*.drawio.bkp

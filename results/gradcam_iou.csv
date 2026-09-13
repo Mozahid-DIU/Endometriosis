@@ -1,0 +1,4 @@
+,mean_IoU,std
+ResNet50,0.1483,0.1448
+EfficientNet-B0,0.2381,0.1627
+ViT-B/16,0.0317,0.0517
