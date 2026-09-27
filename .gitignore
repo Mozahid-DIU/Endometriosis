@@ -32,3 +32,7 @@ desktop.ini
 .idea/
 *.bkp
 *.drawio.bkp
+
+# --- Drive backup dump: model weights, dataset zip, duplicated result files ---
+endometriosis_paper-*/
+endometriosis_paper-*.zip
