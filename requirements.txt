@@ -1,7 +1,13 @@
+# Colab (GPU) installs torch/torchvision itself; these pins are for a local CPU run.
+# torch 2.2.2+cpu is the newest build that loads without a newer MSVC runtime on
+# Windows 10/11, and it needs numpy 1.x:
+#   pip install --index-url https://download.pytorch.org/whl/cpu torch==2.2.2 torchvision==0.17.2
+#   pip install "numpy<2"
 torch>=2.0
 torchvision>=0.15
-numpy
+numpy<2
 pandas
 scikit-learn
 matplotlib
 grad-cam
+scipy

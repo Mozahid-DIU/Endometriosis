@@ -1,0 +1,16 @@
+model,metric,value,ci_low,ci_high
+ResNet50,AUC,0.9151,0.8550,0.9630
+ResNet50,Accuracy,0.8505,0.7850,0.9159
+ResNet50,Precision,0.8033,0.7273,0.8868
+ResNet50,Recall,0.9245,0.8491,0.9811
+ResNet50,F1,0.8596,0.8000,0.9174
+EfficientNet-B0,AUC,0.8326,0.7442,0.9095
+EfficientNet-B0,Accuracy,0.7290,0.6449,0.8037
+EfficientNet-B0,Precision,0.6765,0.6053,0.7541
+EfficientNet-B0,Recall,0.8679,0.7736,0.9434
+EfficientNet-B0,F1,0.7603,0.6891,0.8264
+ViT-B/16,AUC,0.8595,0.7830,0.9266
+ViT-B/16,Accuracy,0.7570,0.6822,0.8224
+ViT-B/16,Precision,0.6800,0.6190,0.7500
+ViT-B/16,Recall,0.9623,0.9057,1.0000
+ViT-B/16,F1,0.7969,0.7463,0.8480

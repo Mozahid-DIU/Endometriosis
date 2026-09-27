@@ -16,21 +16,25 @@ It also goes beyond accuracy. The Grad-CAM heatmaps are compared with the **373 
 
 ## Key findings
 
-| Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC [95% CI] |
 |---|---|---|---|---|---|
-| **ResNet50** | **0.851** | **0.803** | 0.925 | **0.860** | **0.915** |
-| EfficientNet-B0 | 0.729 | 0.677 | 0.868 | 0.760 | 0.833 |
-| ViT-B/16 | 0.757 | 0.680 | **0.962** | 0.797 | 0.860 |
+| **ResNet50** | **0.851** | **0.803** | 0.925 | **0.860** | **0.915 [0.855–0.963]** |
+| EfficientNet-B0 | 0.729 | 0.677 | 0.868 | 0.760 | 0.833 [0.744–0.910] |
+| ViT-B/16 | 0.757 | 0.680 | **0.962** | 0.797 | 0.860 [0.783–0.927] |
 
-*Held-out test set: 107 images from cases that never appear in training (53 endometriosis, 54 normal).*
+*Held-out test set: 107 images from cases that never appear in training (53 endometriosis, 54 normal). Confidence intervals from a 10,000-sample stratified bootstrap.*
 
 **Grad-CAM localization vs. ground-truth lesion masks** (53 test pathology images):
 
-| Model | Mean IoU (± std) | Pointing Game | Coverage |
+| Model | Mean IoU [95% CI] | Pointing Game | Coverage |
 |---|---|---|---|
-| ResNet50 | 0.148 ± 0.145 | 0.264 | 0.165 |
-| **EfficientNet-B0** | **0.238 ± 0.163** | **0.453** | **0.212** |
-| ViT-B/16 | 0.032 ± 0.052 | 0.019 | 0.069 |
+| ResNet50 | 0.148 [0.110–0.188] | 0.264 | 0.165 |
+| **EfficientNet-B0** | **0.238 [0.195–0.283]** | **0.453** | **0.212** |
+| ViT-B/16 | 0.032 [0.020–0.047] | 0.019 | 0.069 |
+
+**Are the differences real?** Every localization gap is significant (Wilcoxon signed-rank on paired per-image values, Holm-corrected: all p < 0.03; EfficientNet-B0 > ResNet50 on IoU p = 0.0002). For classification, ResNet50 beats EfficientNet-B0 on both tests (McNemar p = 0.004; ΔAUC +0.083, 95% CI [+0.018, +0.156]). ResNet50 vs. ViT-B/16 is the honest borderline case: the error patterns differ (McNemar p = 0.041) but the AUC gap is not significant (+0.056, 95% CI [−0.000, +0.114], p = 0.052). EfficientNet-B0 and ViT-B/16 are statistically indistinguishable as classifiers. Full numbers: [results/stats_mcnemar.csv](results/stats_mcnemar.csv), [results/stats_gradcam.csv](results/stats_gradcam.csv).
+
+**Where the errors are.** False positives are not spread evenly — they concentrate in two no-pathology videos: `v_4044` (EfficientNet-B0 wrong on 13 of 14 frames, ViT-B/16 on 11) and `v_4770` (ViT-B/16 wrong on 11 of 13). Eleven test images are misclassified by all three models. Because the split is case-wise, this points at surgery-level appearance (illumination, tissue texture) rather than memorised frames — see [results/stats_error_analysis.csv](results/stats_error_analysis.csv).
 
 **Takeaways**
 1. **ResNet50 is the best classifier.** It has the highest AUC and F1, with a good balance of precision and recall.
@@ -65,7 +69,11 @@ Full write-ups: [docs/methodology.md](docs/methodology.md) · [docs/literature_r
 
 ```
 ├── scripts/
-│   └── prep_dataset.py        # builds the balanced, case-wise split dataset (+ lesion masks, manifest)
+│   ├── prep_dataset.py         # builds the balanced, case-wise split dataset (+ lesion masks, manifest)
+│   ├── predict_test_set.py     # reloads saved weights -> per-image test predictions (CPU)
+│   ├── statistical_analysis.py # bootstrap CIs, McNemar, paired AUC test, error analysis
+│   ├── gradcam_per_image.py    # per-image Grad-CAM IoU / Pointing Game / Coverage (CPU)
+│   └── gradcam_stats.py        # Wilcoxon + McNemar on the localization metrics
 ├── notebooks/
 │   └── Endometriosis.ipynb    # Colab: training, test evaluation, Grad-CAM IoU / Pointing Game / Coverage
 ├── data/
@@ -90,15 +98,27 @@ Full write-ups: [docs/methodology.md](docs/methodology.md) · [docs/literature_r
    Zip `data/` as `glenda_balanced.zip`.
 3. **Train, evaluate and explain.** Open `notebooks/Endometriosis.ipynb` in Google Colab with a T4 GPU, upload the zip, and run all cells. The notebook trains the three models, evaluates them on the test set, and runs the Grad-CAM localization analysis. Saved outputs from the reported run are kept in the notebook.
 
-> Results can differ slightly between runs (about ±0.02 AUC) because cuDNN is not fully deterministic.
+4. **Statistics (CPU, no GPU needed).** With the trained weights available locally:
+   ```bash
+   python scripts/predict_test_set.py       # -> results/test_predictions.csv
+   python scripts/statistical_analysis.py   # -> bootstrap CIs, McNemar, error analysis
+   python scripts/gradcam_per_image.py      # -> results/gradcam_per_image.csv
+   python scripts/gradcam_stats.py          # -> Wilcoxon / McNemar on localization
+   ```
+   Reloading the saved weights on CPU reproduces the reported metrics exactly
+   (accuracy 0.8505 / 0.7290 / 0.7570 and mean IoU 0.1483 / 0.2381 / 0.0317).
+
+> GPU training can differ slightly between runs (about ±0.02 AUC) because cuDNN is not fully deterministic. The CPU analysis scripts above are deterministic, and every bootstrap is seeded (`seed=42`).
 
 ## Roadmap
 
 - [x] Balanced, leakage-free dataset construction
 - [x] CNN vs. ViT training and test-set evaluation
 - [x] Grad-CAM vs. ground-truth mask localization metrics
+- [x] Statistical significance: McNemar's test, paired AUC test, 95% CIs
+- [x] Per-image predictions and error analysis
+- [x] Significance testing for the Grad-CAM localization gaps
 - [ ] 5-fold grouped cross-validation
-- [ ] Statistical significance: McNemar's test and 95% CI for AUC
 - [ ] Attention-rollout explanations for ViT
 - [ ] Paper submission
 
