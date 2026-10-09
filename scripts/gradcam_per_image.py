@@ -90,7 +90,7 @@ def main() -> None:
                    and (MASK_DIR / f"{f.stem}.png").exists())
     print(f"Test pathology images with mask: {len(files)}")
 
-    records: dict[str, dict[str, tuple[float, int, float]]] = {}
+    records: dict[str, dict[str, tuple[float, int, float, float]]] = {}
     for name, (builder, weight_name) in MODEL_SPECS.items():
         model = load_model(builder, weight_name)
         layers, reshape = target_layers(name, model)
@@ -101,7 +101,8 @@ def main() -> None:
             cam = cam_engine(input_tensor=x, targets=[ClassifierOutputTarget(POS)])[0]
             mask = load_mask(MASK_DIR / f"{f.stem}.png")
             hit, coverage = pointing_and_coverage(cam, mask)
-            per_file[f.name] = (iou(cam, mask), hit, coverage)
+            area = float((cam >= CAM_THRESHOLD).mean())   # how much of the frame it claims
+            per_file[f.name] = (iou(cam, mask), hit, coverage, area)
             if i % 10 == 0:
                 print(f"  [{name}] {i}/{len(files)}")
         records[name] = per_file
@@ -115,13 +116,13 @@ def main() -> None:
         w = csv.writer(fh)
         header = ["filename"]
         for name in MODEL_SPECS:
-            header += [f"{name}_IoU", f"{name}_pointing", f"{name}_coverage"]
+            header += [f"{name}_IoU", f"{name}_pointing", f"{name}_coverage", f"{name}_area"]
         w.writerow(header)
         for f in files:
             row: list = [f.name]
             for name in MODEL_SPECS:
-                v_iou, hit, cov = records[name][f.name]
-                row += [f"{v_iou:.6f}", hit, f"{cov:.6f}"]
+                v_iou, hit, cov, area = records[name][f.name]
+                row += [f"{v_iou:.6f}", hit, f"{cov:.6f}", f"{area:.6f}"]
             w.writerow(row)
     print(f"\nSaved {OUT_CSV.relative_to(ROOT)}  ({len(files)} rows)")
 

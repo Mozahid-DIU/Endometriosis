@@ -1,0 +1,12 @@
+kind,name,IoU,PointingGame,Coverage,area_matched_IoU_floor,verdict
+chance,uninformative heatmap,,0.0688,0.0688,,
+baseline,random noise,0.0602,0.0755,0.0687,,
+baseline,centre prior,0.1508,0.3019,0.1231,,
+method,ResNet50,0.1483,,,0.0359,"ratio 4.13, p=3.66e-07, above chance"
+method,EfficientNet-B0,0.2381,,,0.0382,"ratio 6.24, p=5.92e-10, above chance"
+method,ViT-B/16,0.0317,,,0.0384,"ratio 0.83, p=0.0216, BELOW chance"
+method,ViT-B/16 (attention rollout),0.0279,,,0.0318,"ratio 0.88, p=0.0531, indistinguishable from chance"
+vs centre prior,ResNet50,0.1483,,,0.1508,"p=0.91, no better than the centre prior"
+vs centre prior,EfficientNet-B0,0.2381,,,0.1508,"p=1.79e-05, beats the centre prior"
+vs centre prior,ViT-B/16,0.0317,,,0.1508,"p=1.05e-09, WORSE than the centre prior"
+vs centre prior,ViT-B/16 (attention rollout),0.0279,,,0.1508,"p=6.92e-09, WORSE than the centre prior"
