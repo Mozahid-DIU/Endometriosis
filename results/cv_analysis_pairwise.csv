@@ -1,0 +1,4 @@
+model_A,model_B,only_A_correct,only_B_correct,mcnemar_p,mcnemar_significant,auc_diff,ci_low,ci_high,auc_p,auc_significant
+ResNet50,EfficientNet-B0,48,58,0.3821,no,-0.0145,-0.0323,+0.0032,0.1082,no
+ResNet50,ViT-B/16,51,36,0.1329,no,+0.0397,+0.0196,+0.0604,0,yes
+EfficientNet-B0,ViT-B/16,72,47,0.02738,yes,+0.0542,+0.0316,+0.0771,0,yes
