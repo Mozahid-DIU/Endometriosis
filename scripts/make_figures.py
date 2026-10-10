@@ -120,82 +120,82 @@ def figure_cv_auc() -> None:
 
 
 def figure_localization() -> None:
-    base = {r["name"]: r for r in read_csv("localization_baselines.csv")}
-    gc = read_csv("gradcam_per_image.csv")
-    roll = read_csv("vit_rollout_per_image.csv")
+    """Explanation quality over all 373 out-of-fold pathology frames, against the
+    two reference levels a saliency claim has to clear."""
+    rows = read_csv("cv_localization_v3.csv")
+    rollout_label = "ViT-B/16\nattention rollout"
+    per_method: dict[str, dict[str, list[float]]] = {}
+    for r in rows:
+        label = r["model"] if r["method"] == "grad-cam" else rollout_label
+        d = per_method.setdefault(label, {"IoU": [], "pointing": [], "coverage": [],
+                                          "area": [], "mask_area": []})
+        for k in d:
+            d[k].append(float(r[k]))
 
-    methods = [
-        ("EfficientNet-B0", COLOR["EfficientNet-B0"], None,
-         np.mean([float(r["EfficientNet-B0_IoU"]) for r in gc]),
-         np.mean([int(r["EfficientNet-B0_pointing"]) for r in gc])),
-        ("ResNet50", COLOR["ResNet50"], None,
-         np.mean([float(r["ResNet50_IoU"]) for r in gc]),
-         np.mean([int(r["ResNet50_pointing"]) for r in gc])),
-        ("ViT-B/16\nGrad-CAM", COLOR["ViT-B/16"], None,
-         np.mean([float(r["ViT-B/16_IoU"]) for r in gc]),
-         np.mean([int(r["ViT-B/16_pointing"]) for r in gc])),
-        ("ViT-B/16\nattention rollout", COLOR["ViT-B/16"], "///",
-         np.mean([float(r["rollout_IoU"]) for r in roll]),
-         np.mean([int(r["rollout_pointing"]) for r in roll])),
-    ]
-    centre = base["centre prior"]
-    centre_iou, centre_point = float(centre["IoU"]), float(centre["PointingGame"])
-    chance_point = float(base["uninformative heatmap"]["PointingGame"])
-    floors = {m["name"]: float(m["area_matched_IoU_floor"])
-              for m in read_csv("localization_baselines.csv")
-              if m["kind"] == "method"}
+    # the centre prior's own mean IoU is recorded in the note of a vs_centre_prior row
+    centre_iou = None
+    for r in read_csv("cv_localization_summary.csv"):
+        if r["kind"] == "vs_centre_prior" and "reference mean" in r["note"]:
+            centre_iou = float(r["note"].split("reference mean")[1].strip())
+            break
+
+    order = [m for m in ("EfficientNet-B0", "ResNet50", "ViT-B/16", rollout_label)
+             if m in per_method]
+    colours = {"EfficientNet-B0": COLOR["EfficientNet-B0"],
+               "ResNet50": COLOR["ResNet50"],
+               "ViT-B/16": COLOR["ViT-B/16"],
+               rollout_label: COLOR["ViT-B/16"]}
+    hatches = {rollout_label: "///"}
+
+    mask_area = np.array(per_method[order[0]]["mask_area"])
+    chance = float(mask_area.mean())
+    n_frames = len(per_method[order[0]]["IoU"])
 
     fig, axes = plt.subplots(1, 2, figsize=(7.4, 2.9))
-    panels = [
-        (axes[0], "Grad-CAM / rollout overlap with the lesion mask (IoU)", 3, centre_iou, None),
-        (axes[1], "Peak falls inside the lesion (Pointing Game)", 4, centre_point, chance_point),
-    ]
-    for ax, title, value_idx, centre_level, chance_level in panels:
-        ys = np.arange(len(methods))[::-1]
-        for y, (label, colour, hatch, iou_v, point_v) in zip(ys, methods):
-            value = iou_v if value_idx == 3 else point_v
-            ax.barh(y, value, height=0.52, color=colour, hatch=hatch,
+    panels = ((axes[0], "IoU", "Overlap with the lesion mask (IoU)", 0.22),
+              (axes[1], "pointing", "Peak falls inside the lesion (Pointing Game)", 0.42))
+    for ax, metric, title, span in panels:
+        ys = np.arange(len(order))[::-1]
+        for y, name in zip(ys, order):
+            value = float(np.mean(per_method[name][metric]))
+            ax.barh(y, value, height=0.52, color=colours[name], hatch=hatches.get(name),
                     edgecolor="white", linewidth=1.2, zorder=3)
-            span = 0.33 if value_idx == 3 else 0.62
-            if value > 0.3 * span:          # inside the bar, clear of the reference lines
-                ax.text(value - 0.012 * span / 0.33, y, f"{value:.3f}", va="center",
-                        ha="right", fontsize=8.5, color="white", zorder=5)
-            else:
-                ax.text(value + 0.012 * span / 0.33, y, f"{value:.3f}", va="center",
-                        ha="left", fontsize=8.5, color=INK, zorder=5)
-            if value_idx == 3:                       # per-method random floor
-                floor = floors.get(label.replace("\n", " ").replace(
-                    "ViT-B/16 Grad-CAM", "ViT-B/16").replace(
-                    "ViT-B/16 attention rollout", "ViT-B/16 (attention rollout)"), None)
-                if floor:
-                    ax.plot([floor, floor], [y - 0.26, y + 0.26], color=INK_SOFT,
-                            lw=1.4, zorder=5)
+            inside = value > 0.3 * span
+            ax.text(value - 0.012 * span if inside else value + 0.012 * span, y,
+                    f"{value:.3f}", va="center", ha="right" if inside else "left",
+                    fontsize=8.5, color="white" if inside else INK, zorder=5)
+            if metric == "IoU":          # this method's own area-matched floor
+                areas = np.array(per_method[name]["area"])
+                floor = float(np.mean((areas * mask_area) /
+                                      (areas + mask_area - areas * mask_area)))
+                ax.plot([floor, floor], [y - 0.26, y + 0.26], color=INK_SOFT,
+                        lw=1.4, zorder=5)
 
-        if chance_level is not None:
-            ax.axvline(chance_level, color=INK_SOFT, lw=1.2, ls=(0, (1, 2)), zorder=2)
-            ax.text(chance_level, len(methods) - 0.42, " chance", fontsize=8,
-                    color=INK_SOFT, ha="left", va="bottom")
-        ax.axvline(centre_level, color=INK, lw=1.2, ls=(0, (4, 2)), zorder=2)
-        ax.text(centre_level, len(methods) - 0.42, "  centre prior", fontsize=8,
-                color=INK, ha="left", va="bottom")
+        if metric == "pointing":
+            ax.axvline(chance, color=INK_SOFT, lw=1.2, ls=(0, (1, 2)), zorder=2)
+            ax.text(chance, len(order) - 0.42, " chance", fontsize=8, color=INK_SOFT,
+                    ha="left", va="bottom")
+        elif centre_iou:
+            ax.axvline(centre_iou, color=INK, lw=1.2, ls=(0, (4, 2)), zorder=2)
+            ax.text(centre_iou, len(order) - 0.42, "  centre prior", fontsize=8,
+                    color=INK, ha="left", va="bottom")
 
         ax.set_yticks(ys)
-        ax.set_yticklabels([m[0] for m in methods], fontsize=8.5, color=INK)
+        ax.set_yticklabels(order, fontsize=8.5, color=INK)
         ax.set_title(title, fontsize=8.8, color=INK, pad=12, loc="left")
-        ax.set_ylim(-0.6, len(methods) - 0.15)
+        ax.set_xlim(0, span)
+        ax.set_ylim(-0.6, len(order) - 0.15)
         tidy(ax)
 
-    axes[0].set_xlim(0, 0.33)
-    axes[1].set_xlim(0, 0.62)
-    fig.text(0.085, -0.04, "vertical tick on each bar = that method's area-matched random floor",
+    fig.text(0.085, -0.04,
+             f"{n_frames} out-of-fold pathology frames. "
+             "Vertical tick = that method's area-matched random floor.",
              fontsize=7.6, color=INK_SOFT, ha="left", va="top")
     fig.subplots_adjust(wspace=0.5)
     out = RESULTS / "fig_localization.png"
     fig.savefig(out)
     plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
-
-
 
 
 def figure_roc() -> None:
