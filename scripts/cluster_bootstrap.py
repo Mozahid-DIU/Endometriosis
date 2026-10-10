@@ -48,6 +48,11 @@ SEED = 42
 ALPHA = 0.05
 
 
+
+def group_key(row: dict) -> str:
+    """v2 runs record surgery_id; the first run recorded group_id (per segment)."""
+    return row.get("surgery_id") or row["group_id"]
+
 def holm(pvalues: list[float]) -> list[float]:
     order = np.argsort(pvalues)
     n, adjusted, running = len(pvalues), [0.0] * len(pvalues), 0.0
@@ -105,7 +110,7 @@ def classification() -> list[list]:
     files = sorted(set.intersection(*(set(v) for v in by_model.values())))
 
     y = np.array([int(by_model[MODELS[0]][f]["y_true"]) for f in files])
-    groups = np.array([by_model[MODELS[0]][f]["group_id"] for f in files])
+    groups = np.array([group_key(by_model[MODELS[0]][f]) for f in files])
     probs = {m: np.array([float(by_model[m][f]["prob"]) for f in files]) for m in MODELS}
     preds = {m: np.array([int(by_model[m][f]["pred"]) for f in files]) for m in MODELS}
 

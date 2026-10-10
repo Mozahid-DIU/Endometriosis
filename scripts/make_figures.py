@@ -52,6 +52,11 @@ plt.rcParams.update({
 })
 
 
+
+def group_key(row: dict) -> str:
+    """v2 runs record surgery_id; the first run recorded group_id (per segment)."""
+    return row.get("surgery_id") or row["group_id"]
+
 def read_csv(name: str) -> list[dict]:
     return list(csv.DictReader(open(RESULTS / name, encoding="utf-8")))
 
@@ -278,7 +283,7 @@ def figure_error_clusters() -> None:
     per_group: dict[str, dict[str, list[int]]] = {}
     label: dict[str, str] = {}
     for r in read_csv("cv_predictions.csv"):
-        g = r["group_id"]
+        g = group_key(r)
         per_group.setdefault(g, {m: [] for m in MODELS})
         per_group[g][r["model"]].append(int(r["pred"] != r["y_true"]))
         label[g] = "endometriosis" if r["y_true"] == "1" else "no pathology"
@@ -329,7 +334,7 @@ def figure_dataset() -> None:
             continue
         f = int(r["fold"])
         fold_rows.setdefault(f, []).append(int(r["y_true"]))
-        groups.setdefault(f, set()).add(r["group_id"])
+        groups.setdefault(f, set()).add(group_key(r))
 
     folds = sorted(fold_rows)
     endo = np.array([sum(fold_rows[f]) for f in folds])
