@@ -150,18 +150,36 @@ def classification() -> list[list]:
         only_a = int(np.sum(ca & ~cb))
         only_b = int(np.sum(~ca & cb))
         n = only_a + only_b
+        # frame-level: McNemar treats the discordant frames as independent pairs
         p_mc = float(binomtest(only_a, n, 0.5).pvalue) if n else 1.0
 
-        raw_auc.append(p_auc); raw_mc.append(p_mc)
-        detail.append((a, b, observed, lo, hi, only_a, only_b))
+        # surgery-level equivalent: resample surgeries and compare accuracy
+        acc_diff = float(ca.mean() - cb.mean())
+        acc_boots = np.array([ca[i].mean() - cb[i].mean() for i in g_samples])
+        acc_lo, acc_hi = ci(acc_boots)
+        p_acc = 2 * min(float(np.mean(acc_boots <= 0)), float(np.mean(acc_boots >= 0)))
+        p_acc = min(max(p_acc, 1.0 / N_BOOT), 1.0)
 
-    for (a, b, observed, lo, hi, only_a, only_b), p_auc, p_mc in zip(
+        raw_auc.append(p_auc); raw_mc.append(p_acc)
+        detail.append((a, b, observed, lo, hi, only_a, only_b,
+                       acc_diff, acc_lo, acc_hi, p_mc, p_auc, p_acc))
+
+    for (a, b, observed, lo, hi, only_a, only_b, acc_diff, acc_lo, acc_hi,
+         p_mc_raw, p_auc_raw, p_acc_raw), p_auc, p_acc in zip(
             detail, holm(raw_auc), holm(raw_mc)):
         verdict = "significant" if p_auc < ALPHA else "not significant"
-        print(f"{a:16s} vs {b:16s} dAUC {observed:+.4f} [{lo:+.4f},{hi:+.4f}] "
-              f"p_holm={p_auc:.4g} ({verdict}) | McNemar {only_a}/{only_b} p_holm={p_mc:.4g}")
+        print(f"{a:16s} vs {b:16s}")
+        print(f"    dAUC      {observed:+.4f} [{lo:+.4f},{hi:+.4f}]  "
+              f"p_raw={p_auc_raw:.4g}  p_holm={p_auc:.4g}  ({verdict})")
+        print(f"    dAccuracy {acc_diff:+.4f} [{acc_lo:+.4f},{acc_hi:+.4f}]  "
+              f"p_raw={p_acc_raw:.4g}  p_holm={p_acc:.4g}   (surgery-level)")
+        print(f"    discordant frames {only_a}/{only_b}, McNemar p={p_mc_raw:.4g} "
+              f"(frame-level, ignores clustering)")
         out.append(["pairwise", a, b, f"{observed:+.4f}", f"{lo:+.4f}", f"{hi:+.4f}",
-                    f"{p_auc:.4g}", verdict, f"{only_a}/{only_b}", f"{p_mc:.4g}"])
+                    f"raw={p_auc_raw:.4g}; holm={p_auc:.4g}", verdict,
+                    f"{only_a}/{only_b}; McNemar frame-level p={p_mc_raw:.4g}",
+                    f"dAcc {acc_diff:+.4f} [{acc_lo:+.4f},{acc_hi:+.4f}] "
+                    f"raw={p_acc_raw:.4g} holm={p_acc:.4g}"])
     return out
 
 

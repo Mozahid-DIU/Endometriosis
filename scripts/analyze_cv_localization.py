@@ -46,11 +46,16 @@ def holm(pvalues: list[float]) -> list[float]:
     return adjusted
 
 
-def centre_prior_region() -> np.ndarray:
+def centre_prior_map() -> np.ndarray:
+    """The prior itself, normalised to [0, 1] exactly as a saliency map is."""
     yy, xx = np.mgrid[0:224, 0:224]
     g = np.exp(-(((xx - 112) ** 2 + (yy - 112) ** 2) / (2 * (0.25 * 224) ** 2)))
-    g = (g - g.min()) / (g.max() - g.min())
-    return (g >= CAM_THRESHOLD).astype(np.uint8)
+    return (g - g.min()) / (g.max() - g.min())
+
+
+def centre_prior_region() -> np.ndarray:
+    """...and thresholded at the same 0.5 used for every method's IoU."""
+    return (centre_prior_map() >= CAM_THRESHOLD).astype(np.uint8)
 
 
 def mask_for(filename: str) -> np.ndarray | None:
@@ -99,6 +104,7 @@ def main() -> None:
         centre_iou.append(float((centre & m).sum() / union) if union else 0.0)
         mask_area.append(float(m.mean()))
     centre_iou = np.asarray(centre_iou)
+    centre_iou_list = centre_iou
     mask_area = np.asarray(mask_area)
     print(f"lesions cover {mask_area.mean():.2%} of a frame on average "
           f"({mask_area.min():.2%}-{mask_area.max():.2%}); "
@@ -166,7 +172,43 @@ def main() -> None:
                     f"{lo:+.4f}", f"{hi:+.4f}", f"p_holm={p:.4g} ({verdict}); "
                     f"reference mean {ref:.4f}"])
 
-    # chance level for the two area-free metrics is the mean mask area
+    # Pointing Game and Coverage have an analytic chance level: a map with no
+    # spatial information scores the mask's area fraction on both. Testing against
+    # it is what licenses the phrase "at chance" for those two metrics.
+    print("\n=== Pointing Game and Coverage against chance (Holm-corrected) ===")
+    raw, detail = [], []
+    for name in names:
+        for metric in ("pointing", "coverage"):
+            d = values[name][metric] - mask_area
+            boots = np.array([d[i].mean() for i in samples])
+            lo, hi = ci(boots)
+            p = 2 * min(float(np.mean(boots <= 0)), float(np.mean(boots >= 0)))
+            raw.append(min(max(p, 1.0 / N_BOOT), 1.0))
+            detail.append((name, metric, float(d.mean()), lo, hi))
+    for (name, metric, diff, lo, hi), p in zip(detail, holm(raw)):
+        verdict = ("above" if diff > 0 and p < ALPHA else
+                   "below" if diff < 0 and p < ALPHA else "indistinguishable")
+        print(f"  {name:32s} {metric:9s} {diff:+.4f} [{lo:+.4f},{hi:+.4f}] "
+              f"p={p:.4g} -> {verdict} chance")
+        out.append([f"vs_chance_{metric}", name, "uninformative heat map",
+                    f"{diff:+.4f}", f"{lo:+.4f}", f"{hi:+.4f}",
+                    f"p_holm={p:.4g} ({verdict}); chance = {mask_area.mean():.4f}"])
+
+    # the centre prior's own Pointing Game and Coverage, for completeness
+    centre_hits, centre_cov = [], []
+    centre_map = centre_prior_map()
+    for f in files:
+        m = mask_for(f)
+        peak = np.unravel_index(np.argmax(centre_map), centre_map.shape)
+        centre_hits.append(int(m[peak] > 0))
+        centre_cov.append(float((centre_map * m).sum() / (centre_map.sum() + 1e-8)))
+    print(f"\n  centre prior: IoU {np.mean(centre_iou_list):.4f}  "
+          f"Pointing {np.mean(centre_hits):.4f}  Coverage {np.mean(centre_cov):.4f}")
+    out.append(["reference", "centred Gaussian", "pointing",
+                f"{np.mean(centre_hits):.4f}", "", "", ""])
+    out.append(["reference", "centred Gaussian", "coverage",
+                f"{np.mean(centre_cov):.4f}", "", "", ""])
+
     out.append(["chance", "uninformative heat map", "pointing/coverage",
                 f"{mask_area.mean():.4f}", "", "", "equals the mean lesion area"])
 
