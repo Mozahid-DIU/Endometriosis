@@ -1,4 +1,9 @@
 section,model,metric,value,spread_or_ci,detail
+fold_composition,fold 0,prevalence,0.4545,n=176,80 pathology
+fold_composition,fold 1,prevalence,0.6640,n=125,83 pathology
+fold_composition,fold 2,prevalence,0.3778,n=135,51 pathology
+fold_composition,fold 3,prevalence,0.5878,n=131,77 pathology
+fold_composition,fold 4,prevalence,0.4581,n=179,82 pathology
 cv_mean_std,ResNet50,Accuracy,0.8228,0.0984,0.7500 0.9440 0.7556 0.9160 0.7486
 cv_mean_std,ResNet50,Precision,0.7912,0.1515,0.6579 0.9872 0.6406 0.9024 0.7681
 cv_mean_std,ResNet50,Recall,0.8553,0.1318,0.9375 0.9277 0.8039 0.9610 0.6463

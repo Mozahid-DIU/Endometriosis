@@ -2,6 +2,6 @@ kind,model_A,model_B,value,frame_ci_low,frame_ci_high,cluster_ci_low,cluster_ci_
 auc_ci,ResNet50,,0.8997,0.8764,0.9210,0.8537,0.9387,,
 auc_ci,EfficientNet-B0,,0.8515,0.8241,0.8779,0.7762,0.9157,,
 auc_ci,ViT-B/16,,0.8959,0.8725,0.9177,0.8324,0.9443,,
-pairwise,ResNet50,EfficientNet-B0,+0.0482,+0.0097,+0.0953,0.03,significant,84/46,0.002185
-pairwise,ResNet50,ViT-B/16,+0.0039,-0.0396,+0.0533,0.8694,not significant,58/69,0.375
-pairwise,EfficientNet-B0,ViT-B/16,-0.0444,-0.0870,-0.0042,0.0584,not significant,50/99,0.0002198
+pairwise,ResNet50,EfficientNet-B0,+0.0482,+0.0097,+0.0953,raw=0.01; holm=0.03,significant,84/46; McNemar frame-level p=0.001093,"dAcc +0.0509 [-0.0013,+0.1032] raw=0.058 holm=0.126"
+pairwise,ResNet50,ViT-B/16,+0.0039,-0.0396,+0.0533,raw=0.8694; holm=0.8694,not significant,58/69; McNemar frame-level p=0.375,"dAcc -0.0147 [-0.0717,+0.0437] raw=0.6192 holm=0.6192"
+pairwise,EfficientNet-B0,ViT-B/16,-0.0444,-0.0870,-0.0042,raw=0.0292; holm=0.0584,not significant,50/99; McNemar frame-level p=7.328e-05,"dAcc -0.0657 [-0.1341,-0.0027] raw=0.042 holm=0.126"

@@ -106,6 +106,11 @@ def main() -> None:
         print(f"  fold {fold}: n={len(ys):3d}  endometriosis={sum(ys):3d} "
               f"({sum(ys) / len(ys):.1%})")
     prevalences = [sum(v) / len(v) for v in per_fold.values()]
+    for fold in sorted(per_fold):
+        ys = per_fold[fold]
+        rows_summary.append(["fold_composition", f"fold {fold}", "prevalence",
+                             f"{sum(ys) / len(ys):.4f}", f"n={len(ys)}",
+                             f"{sum(ys)} pathology"])
     print(f"  prevalence ranges {min(prevalences):.1%} to {max(prevalences):.1%} across folds, "
           f"so accuracy and precision are not comparable fold to fold; AUC is.")
 

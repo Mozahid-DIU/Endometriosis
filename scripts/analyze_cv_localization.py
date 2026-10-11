@@ -125,6 +125,10 @@ def main() -> None:
             for k in ("IoU", "pointing", "coverage", "area")}
 
     out: list[list] = []
+    # the paper quotes these, so they belong in an artifact rather than only in a log
+    out.append(["dataset", "lesion area fraction", "mean", f"{mask_area.mean():.4f}",
+                f"{mask_area.min():.4f}", f"{mask_area.max():.4f}",
+                f"{len(files)} frames, {len(set(surgeries))} surgeries"])
     print("\n=== means with 95% surgery-level intervals ===")
     for name in names:
         parts = []
