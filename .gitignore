@@ -45,3 +45,6 @@ desktop.ini
 # --- Drive backup dump: model weights, dataset zip, duplicated result files ---
 endometriosis_paper-*/
 endometriosis_paper-*.zip
+
+# Generated for the Overleaf upload; rebuild with scripts/build_latex.py
+paper/overleaf.zip
