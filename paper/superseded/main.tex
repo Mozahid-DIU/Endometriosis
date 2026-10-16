@@ -1,0 +1,140 @@
+%% ============================================================
+%% Comparative Analysis of CNN and Vision Transformer Architectures
+%% for Explainable Endometriosis Classification in Laparoscopic Images
+%%
+%% IEEE format. Compile on Overleaf (recommended) or locally:
+%%   pdflatex main  ->  bibtex main  ->  pdflatex main  ->  pdflatex main
+%% Switch [journal] to [conference] in \documentclass if targeting a conference.
+%% ============================================================
+\documentclass[journal]{IEEEtran}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+
+\title{Comparative Analysis of CNN and Vision Transformer Architectures for Explainable Endometriosis Classification in Laparoscopic Images}
+
+\author{
+  Author Name\textsuperscript{1},
+  Co-Author Name\textsuperscript{2}
+  \thanks{\textsuperscript{1}Department, University, City, Country (e-mail: you@example.com).}
+  \thanks{\textsuperscript{2}Department, University, City, Country.}
+}
+
+\markboth{Preprint --- do not distribute}{}
+\maketitle
+
+\begin{abstract}
+% TODO: write last (after Results). ~200 words:
+% problem, gap, what we did, key numbers, main finding, significance.
+\textit{Placeholder abstract. To be written after the Results section.}
+\end{abstract}
+
+\begin{IEEEkeywords}
+Endometriosis, deep learning, convolutional neural network, vision transformer,
+laparoscopy, explainable AI, Grad-CAM, medical image classification.
+\end{IEEEkeywords}
+
+% ============================================================
+\section{Introduction}
+% NOTE: verify every factual number against its cited source before submission.
+
+% ---- Importance of the Research Topic ----
+Endometriosis is a chronic, estrogen-dependent inflammatory disorder in which tissue resembling
+the endometrial lining grows outside the uterine cavity---on the peritoneum, ovaries, uterus, and,
+in advanced cases, as deep infiltrating endometriosis. It affects an estimated 10\% of women of
+reproductive age worldwide, translating to roughly 190 million individuals, and is a leading cause
+of chronic pelvic pain, dysmenorrhea, dyspareunia, and infertility~\cite{ref_e1,ref_e3}. Beyond
+its clinical burden, the condition carries a substantial socioeconomic cost through lost
+productivity, repeated consultations, and diminished quality of life, making it a pressing
+women's-health research priority that has historically received disproportionately little
+attention~\cite{ref_e3,ref_d1}. Improving the speed and accuracy of endometriosis detection
+therefore has direct real-world significance for a large, underserved patient population.
+
+% ---- Importance of the Specific Problem ----
+Despite its prevalence, endometriosis is exceptionally difficult to diagnose, with patients
+experiencing an average diagnostic delay of 7--10 years between symptom onset and definitive
+diagnosis~\cite{ref_e3,ref_d1}. This delay arises from non-specific, overlapping symptoms, the
+absence of a reliable non-invasive biomarker, and continued reliance on laparoscopy---an invasive
+surgical procedure---as the diagnostic gold standard~\cite{ref_a3}. During laparoscopy, accurate
+identification of lesions depends heavily on the operating surgeon's experience, producing
+inter-observer variability and a real risk of missing subtle or atypical lesions~\cite{ref_a3,ref_a10}.
+The consequences of delayed or missed diagnosis are severe: disease progression, avoidable repeat
+surgeries, and prolonged suffering~\cite{ref_e4}. An effective, reliable, and objective
+decision-support tool to assist lesion recognition during laparoscopy is thus a clear and urgent
+clinical need.
+
+% ---- Role of AI / ML / DL in the Domain ----
+Artificial intelligence has emerged as a transformative aid for computer-assisted diagnosis in
+gynecologic imaging. Convolutional Neural Networks (CNNs) have demonstrated strong performance in
+classifying and localizing endometriotic lesions, with reported accuracies of 0.89--0.93 on the
+public Gynecologic Laparoscopy ENdometriosis DAtaset (GLENDA)~\cite{ref_a1,ref_a2}, and
+meta-analytic evidence confirms deep learning as the strongest-performing family of methods across
+imaging modalities~\cite{ref_e2}. More recently, Vision Transformers (ViTs)---which capture global
+context through self-attention rather than local convolution---have shown competitive and sometimes
+superior performance in surgical image tasks~\cite{ref_a9}. Collectively, these technologies can
+reduce observer dependence, standardize interpretation, and shorten the diagnostic pathway,
+positioning AI as a meaningful contributor to earlier and more consistent endometriosis diagnosis.
+
+% ---- Existing Limitations and Proposed Contribution ----
+Nevertheless, existing image-based studies share several limitations. First, GLENDA is severely
+class-imbalanced (373 pathology versus 13{,}438 non-pathology frames), yet many works report
+accuracy on imbalanced data, yielding optimistic and potentially misleading results. Second, most
+models operate as black boxes, reporting predictive metrics without demonstrating \emph{where} the
+model attends or whether that attention aligns with the true lesion, which undermines clinical
+trust~\cite{ref_a1,ref_e4}. Third, comparisons between CNN and Transformer families are often
+performed without a fair, leakage-free protocol, and frames from the same surgery frequently leak
+across training and test sets, inflating reported performance. To address these gaps, this study
+proposes a fair, leakage-controlled comparison of CNN and ViT architectures on a balanced GLENDA
+subset, augmented with a \emph{quantitative} explainability analysis that measures the overlap
+between Grad-CAM attention~\cite{ref_gradcam} and GLENDA's ground-truth lesion masks~\cite{ref_a4}.
+
+\noindent The main contributions of this work are:
+\begin{itemize}
+  \item A reproducible, leakage-free balanced benchmark on GLENDA for binary endometriosis
+        classification, using patient/case-wise splitting so that frames from the same surgery
+        never appear in both training and test sets---an issue overlooked in much prior work.
+  \item A fair comparison of CNN (ResNet50~\cite{ref_resnet}, EfficientNet-B0~\cite{ref_efficientnet})
+        and Vision Transformer (ViT-Base/16~\cite{ref_vit}) architectures under identical
+        transfer-learning, augmentation, and cross-validation protocols, evaluated with a complete
+        metric suite (accuracy, precision, recall, F1, ROC-AUC) and statistical significance testing.
+  \item A quantitative explainability evaluation comparing Grad-CAM attention maps against
+        ground-truth lesion masks (IoU-based overlap), assessing not merely \emph{whether} a model
+        is accurate but \emph{whether it attends to clinically relevant regions}.
+\end{itemize}
+
+These contributions directly address the identified limitations---imbalance, data leakage, and
+opaque decision-making---and thereby strengthen the reliability and clinical credibility of
+automated endometriosis classification.
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work,
+organized by category. Section~\ref{sec:method} describes the dataset and proposed methodology.
+Section~\ref{sec:results} presents results and statistical analysis. Section~\ref{sec:discussion}
+discusses findings, limitations, and threats to validity, and Section~\ref{sec:conclusion} concludes.
+
+% ============================================================
+\section{Literature Review}\label{sec:related}
+% TODO (next): overall overview + 2.1 ML-based, 2.2 DL-based, 2.3 XAI, 2.4 Recent works, 2.5 Gap.
+
+\section{Methodology}\label{sec:method}
+% TODO
+
+\section{Results}\label{sec:results}
+% TODO (after experiments)
+
+\section{Discussion}\label{sec:discussion}
+% TODO
+
+\section{Conclusion}\label{sec:conclusion}
+% TODO
+
+% ============================================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
