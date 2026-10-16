@@ -41,7 +41,7 @@ OVERCLAIMS: list[tuple[str, str, str]] = [
     (r"\btied\b",
      "a null result is not a tie",
      "no evidence of a difference"),
-    (r"\bprove[sd]?\b|\bproof\b",
+    (r"\bprove[sd]?\b|\bproof\b(?!-of-concept)",
      "statistics do not prove",
      "indicate / provide evidence for"),
     (r"\bthe model (uses|used|relies on|focuses on) the lesion\b",
@@ -111,7 +111,10 @@ def check_section(path: Path, known: set[float]) -> list[str]:
     problems: list[str] = []
 
     for line_no, line in enumerate(text.splitlines(), 1):
-        for value in numbers_in(line):
+        # cross-references (Section 5.4, Fig. 3, Table 4a) are not measurements
+        line_for_numbers = re.sub(r"(Section|Sec\.|Fig\.|Figure|Table|Eq\.)\s*\d+(\.\d+)?",
+                                  "", line, flags=re.IGNORECASE)
+        for value in numbers_in(line_for_numbers):
             # years, section numbers, page counts and percentages of the frame are
             # not result values; skip the obvious non-statistics
             if value >= 100 or value in {0.5, 1.0, 2.0, 5.0, 0.05}:
