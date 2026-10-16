@@ -1,6 +1,6 @@
 # Reference check against Crossref
 
-36 entries checked. 1 still carry a `VERIFY` placeholder.
+36 entries checked. 0 still carry a `VERIFY` placeholder.
 
 | status | count | meaning |
 |---|---|---|
@@ -24,7 +24,7 @@
 - **authors:** Zaidi, Shujaat Ali and Chouvatut, Varin and Phongnarisorn, Chailert and Praserttitipong, Dussadee
 - **journal:** Intelligence-Based Medicine (2025)
 - **doi:** 10.1016/j.ibmed.2025.100230
-- bib note: https://www.sciencedirect.com/science/article/pii/S266652122500033X
+- bib note: \url{https://www.sciencedirect.com/science/article/pii/S266652122500033X}
 
 ### `ref_a3`
 - bib title: Endometriosis detection and localization in laparoscopic gynecology
@@ -43,14 +43,14 @@
 - **authors:** Figueredo, Weslley Kelson Ribeiro and Silva, Aristófanes Corrêa and de Paiva, Anselmo Cardoso and Diniz, João Otávio Bandeira and Brandão, Alice and Oliveira, Marco Aurelio Pinho
 - **journal:** Image and Vision Computing (2024)
 - **doi:** 10.1016/j.imavis.2024.105261
-- bib note: https://www.sciencedirect.com/science/article/abs/pii/S0262885624003664
+- bib note: \url{https://www.sciencedirect.com/science/article/abs/pii/S0262885624003664}
 
 ### `ref_a9`
 - bib title: SWOT Analysis of Vision Transformers (ViTs) for Automated Diagnosis of Endometriosis from Laparoscopic Videos: Feasibility and Ethical Challenges
 - **authors:** Haqiqat, Parnian and Amininejad, Amir and Rouzbeh, Fardis and Gholami, Kosar and Gholami, Hanieh
 - **journal:** InfoScience Trends (2025)
 - **doi:** 10.61186/ist.202502.05.02
-- bib note: https://www.isjtrend.com/article_220048.html
+- bib note: \url{https://www.isjtrend.com/article_220048.html}
 
 ### `ref_b1`
 - bib title: Augmenting endometriosis analysis from ultrasound data using deep learning
@@ -99,14 +99,14 @@
 - **authors:** Shrestha, Palpasa and Shrestha, Bibek and Shrestha, Jati and Chen, Jun
 - **journal:** Journal of Nepal Medical Association (2025)
 - **doi:** 10.31729/jnma.8897
-- bib note: https://pmc.ncbi.nlm.nih.gov/articles/PMC12122278/
+- bib note: \url{https://pmc.ncbi.nlm.nih.gov/articles/PMC12122278/}
 
 ### `ref_e4`
 - bib title: Assessing the Utility of Artificial Intelligence in Endometriosis: Promises and Pitfalls
 - **authors:** Dungate, Brie and Tucker, Dwayne R and Goodwin, Emma and Yong, Paul J
 - **journal:** Women's Health (2024)
 - **doi:** 10.1177/17455057241248121
-- bib note: https://pmc.ncbi.nlm.nih.gov/articles/PMC11062212/
+- bib note: \url{https://pmc.ncbi.nlm.nih.gov/articles/PMC11062212/}
 
 ### `ref_m2`
 - bib title: Identification and validation of a novel machine learning model for predicting severe pelvic endometriosis: A retrospective study
@@ -143,7 +143,7 @@
 - **authors:** Singh, Yashbir and Hathaway, Quincy A. and Keishing, Varekan and Salehi, Sara and Wei, Yujia and Horvat, Natally and Vera-Garcia, Diana V. and Choudhary, Ashok and Mula Kh, Almurtadha and Quaia, Emilio and Andersen, Jesper B
 - **journal:** Bioengineering (2025)
 - **doi:** 10.3390/bioengineering12080879
-- bib note: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12383817/
+- bib note: \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12383817/}
 
 ### `ref_resnet`
 - bib title: Deep Residual Learning for Image Recognition
@@ -236,7 +236,7 @@
 
 ### `ref_who`
 - bib title: Endometriosis
-- bib note: https://www.who.int/news-room/fact-sheets/detail/endometriosis, accessed 16 October 2026
+- bib note: \url{https://www.who.int/news-room/fact-sheets/detail/endometriosis}, accessed 16 October 2026
 
 ### `ref_glenda_web`
 - bib title: {GLENDA} v1.5 release page: dataset statistics and licence
