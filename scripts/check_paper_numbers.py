@@ -112,7 +112,7 @@ def check_section(path: Path, known: set[float]) -> list[str]:
 
     for line_no, line in enumerate(text.splitlines(), 1):
         # cross-references (Section 5.4, Fig. 3, Table 4a) are not measurements
-        line_for_numbers = re.sub(r"(Section|Sec\.|Fig\.|Figure|Table|Eq\.)\s*\d+(\.\d+)?",
+        line_for_numbers = re.sub(r"\b(Section|Sec\.|Fig\.|Figure|Table|Eq\.)\s*\d+(\.\d+)?",
                                   "", line, flags=re.IGNORECASE)
         for value in numbers_in(line_for_numbers):
             # years, section numbers, page counts and percentages of the frame are
@@ -127,7 +127,7 @@ def check_section(path: Path, known: set[float]) -> list[str]:
             m = re.search(pattern, line, re.IGNORECASE)
             # "does not prove", "we make no such claim": the phrase is being denied,
             # which is the hedge we want rather than an overclaim
-            negated = bool(m) and bool(re.search(r"(not|no|never|cannot|nor)[^.]{0,40}$",
+            negated = bool(m) and bool(re.search(r"\b(not|no|never|cannot|nor)\b[^.]{0,40}$",
                                                  line[:m.start()] if m else "", re.IGNORECASE))
             if m and not negated:
                 problems.append(f"  OVERCLAIM line {line_no}: \"{m.group()}\" - {why}"
