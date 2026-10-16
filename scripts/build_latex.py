@@ -71,6 +71,13 @@ FIGURES = [
      "recordings rather than spreading across the dataset."),
 ]
 
+# "Fig. N" as the markdown writes it, mapped to a label. Kept explicit rather
+# than read off the position in FIGURES, so that moving an entry in that list
+# cannot silently repoint every cross-reference.
+FIGURE_NUMBER = {"1": "fig:folds", "2": "fig:confusion", "3": "fig:cvauc",
+                 "4": "fig:roc", "5": "fig:localization", "6": "fig:overlays",
+                 "7": "fig:errors"}
+
 SECTION_LABELS = {
     "02_introduction": "sec:intro",
     "03_related_work": "sec:related",
@@ -164,11 +171,16 @@ def inline(text: str) -> str:
     text = CITATION_RUN.sub(park, text)
     text = escape(text)
     text = re.sub(r"`([^`]+)`", lambda m: r"\texttt{" + m.group(1) + "}", text)
-    text = re.sub(r"\*\*([^*]+)\*\*", lambda m: r"\textbf{" + m.group(1) + "}", text)
+    # Non-greedy rather than [^*]+, because bold runs contain emphasis: a cell
+    # reading **+0.022 [...], *p* = 0.0048** matched neither pattern cleanly and
+    # left stray asterisks in the table. The emphasis pass below then handles the
+    # inner *p* inside the \textbf{} this produced.
+    text = re.sub(r"\*\*(.+?)\*\*", lambda m: r"\textbf{" + m.group(1) + "}", text)
     text = re.sub(r"\*([^*]+)\*", lambda m: r"\emph{" + m.group(1) + "}", text)
     text = re.sub(r"\x00CITE(\d+)\x00", lambda m: stash[int(m.group(1))], text)
     text = re.sub(r"Fig\.~?\s*(\d)",
-                  lambda m: r"Fig.~\ref{" + FIGURES[int(m.group(1)) - 1][1] + "}", text)
+                  lambda m: (r"Fig.~\ref{" + FIGURE_NUMBER[m.group(1)] + "}"
+                             if m.group(1) in FIGURE_NUMBER else m.group(0)), text)
     text = re.sub(r"Section~?\s*(\d\.\d)",
                   lambda m: r"Section~\ref{" + SUBSECTION_REFS.get(m.group(1), "sec:results") + "}",
                   text)
@@ -200,7 +212,13 @@ def table(lines: list[str], number: str | None = None,
         out.append(r"\caption{" + inline(caption) + "}")
     if number:
         out.append(r"\label{" + TABLE_LABELS[number] + "}")
-    out += [r"\small", r"\begin{tabular}{" + spec + "}", r"\toprule"]
+    # Several of these tables are wider than the text block, and a tabular that
+    # overruns is silently clipped by the PDF viewer - whole columns disappeared
+    # from Tables 1, 2, 3 and 5. The \ifdim guard shrinks only what is too wide,
+    # so narrow tables are not blown up to fill the line.
+    out += [r"\small", r"\setlength{\tabcolsep}{4pt}",
+            r"\resizebox{\ifdim\width>\textwidth\textwidth\else\width\fi}{!}{%",
+            r"\begin{tabular}{" + spec + "}", r"\toprule"]
     out.append(" & ".join(inline(c) for c in rows[0]) + r" \\")
     out.append(r"\midrule")
     for row in rows[1:]:
@@ -210,17 +228,42 @@ def table(lines: list[str], number: str | None = None,
             out.append(r"\multicolumn{" + str(width) + "}{l}{" + inline(row[0]) + r"} \\")
         else:
             out.append(" & ".join(inline(c) for c in row) + r" \\")
-    out += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
+    out += [r"\bottomrule", r"\end{tabular}}", r"\end{table}", ""]
     return "\n".join(out)
 
 
 def figure(entry: tuple[str, str, str]) -> str:
     filename, label, caption = entry
     return "\n".join([
-        r"\begin{figure}[t]", r"\centering",
+        r"\begin{figure}[htbp]", r"\centering",
         r"\includegraphics[width=\linewidth]{figures/" + filename + "}",
         r"\caption{" + caption + "}", r"\label{" + label + "}",
         r"\end{figure}", ""])
+
+
+def place_figures(body: str) -> tuple[str, int]:
+    """Put each figure just after the paragraph that first refers to it.
+
+    All seven used to be emitted together at the end of the Results section.
+    That is more floats than LaTeX will hold, so it deferred four of them to the
+    end of the document and they came out after the bibliography. Figures keep
+    the order of FIGURES, so the numbers LaTeX assigns still match the ones the
+    markdown writes, and none is placed before its first mention.
+    """
+    lines = body.split("\n")
+    insertions: list[tuple[int, str]] = []
+    previous = -1
+    for entry in FIGURES:
+        marker = "\\ref{" + entry[1] + "}"
+        cited = next((i for i, line in enumerate(lines) if marker in line), None)
+        if cited is None:
+            print(f"  WARNING: {entry[1]} is never referred to in the text")
+            cited = len(lines) - 1
+        previous = max(cited, previous + 1)
+        insertions.append((previous, figure(entry)))
+    for index, block in reversed(insertions):
+        lines.insert(index + 1, block)
+    return "\n".join(lines), len(insertions)
 
 
 LIST_MARKER = re.compile(r"^(\d+\.|[-*])\s+")
@@ -338,8 +381,20 @@ def main() -> None:
 
     parts = [
         r"\documentclass[preprint,12pt]{elsarticle}",
+        # T1 is not cosmetic: without it the comma-below accents in Bļizņuks set
+        # as separate commas, and the bibliography carries several such names.
+        r"\usepackage[T1]{fontenc}",
         r"\usepackage{graphicx}", r"\usepackage{booktabs}", r"\usepackage{amsmath}",
-        r"\usepackage[hidelinks]{hyperref}", r"\journal{Biomedical Signal Processing and Control}",
+        r"\usepackage[hidelinks]{hyperref}",
+        # LaTeX's defaults refuse a page that is mostly float, and a figure it
+        # refuses is pushed to the end of the document - which is how four of
+        # them ended up after the bibliography. These let it place a float where
+        # the text asks for one.
+        r"\setcounter{topnumber}{3}", r"\setcounter{bottomnumber}{2}",
+        r"\setcounter{totalnumber}{5}",
+        r"\renewcommand{\topfraction}{0.9}", r"\renewcommand{\bottomfraction}{0.9}",
+        r"\renewcommand{\textfraction}{0.05}", r"\renewcommand{\floatpagefraction}{0.7}",
+        r"\journal{Biomedical Signal Processing and Control}",
         "", r"\begin{document}", r"\begin{frontmatter}",
         r"\title{" + escape(TITLE) + "}",
         AUTHOR, AFFILIATION, CORRESPONDING, "",
@@ -348,22 +403,20 @@ def main() -> None:
         r"\end{frontmatter}", "",
     ]
 
-    figures_placed = 0
+    body: list[str] = []
     for path in sorted(SECTIONS.glob("*.md")):
         if path.stem == "01_abstract":
             continue
         md = path.read_text(encoding="utf-8")
         heading = re.search(r"^##\s+(.+)$", md, re.M)
-        parts.append(r"\section{" + inline(heading.group(1)) + "}" if heading else "")
+        body.append(r"\section{" + inline(heading.group(1)) + "}" if heading else "")
         if path.stem in SECTION_LABELS:
-            parts.append(r"\label{" + SECTION_LABELS[path.stem] + "}")
-        parts.append("")
-        parts.append(merge_lists(convert(md)))
-        # figures live in the Results section, where they are discussed
-        if path.stem == "05_results":
-            for entry in FIGURES:
-                parts.append(figure(entry))
-                figures_placed += 1
+            body.append(r"\label{" + SECTION_LABELS[path.stem] + "}")
+        body.append("")
+        body.append(merge_lists(convert(md)))
+
+    placed, figures_placed = place_figures("\n".join(body))
+    parts.append(placed)
 
     parts += [r"\bibliographystyle{elsarticle-num}", r"\bibliography{references}",
               r"\end{document}", ""]
