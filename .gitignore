@@ -10,8 +10,17 @@ data/*
 *.pt
 *.ckpt
 
-# --- Paper draft (unpublished, work in progress) ---
-paper/
+# --- Paper: the draft itself is tracked; these are superseded or local ---
+paper/main.tex              # IEEEtran draft from the abandoned conference plan
+paper/01_introduction.md    # superseded by paper/sections/02_introduction.md
+paper/references.md         # superseded by paper/references.bib
+paper/*.bak
+paper/*.pdf
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
 
 # --- Early prototype, superseded by notebooks/Endometriosis.ipynb ---
 endometriosis_transfer_learning.py
