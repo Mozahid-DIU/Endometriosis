@@ -1,0 +1,359 @@
+% ============================================================
+% References for: CNN vs ViT Explainable Endometriosis Classification
+%
+% Every entry was checked against Crossref on 2026-10-09 by
+% scripts/verify_references.py; authors, journal, year and DOI were then
+% filled from the confirmed record by scripts/fill_references.py.
+% Report: reference_check.md / reference_check.csv
+%
+% ref_resnet, ref_efficientnet, ref_vit, ref_shap, ref_lime are cited from
+% their canonical venues (CVPR/ICML/ICLR/NeurIPS/KDD). A Crossref *title
+% search* mis-resolves some of them -- it returns "EnhanceNet" for
+% EfficientNet and an SSRN look-alike for the ViT paper -- so do not
+% "correct" these from a search hit. ICML/ICLR/NeurIPS papers have no DOI
+% by design; the arXiv id is given in the note field instead.
+% ============================================================
+
+% ---------- A: Laparoscopy / GLENDA ----------
+@article{ref_a1,
+  title     = {Explainable Deep Learning for Endometriosis Classification in Laparoscopic Images},
+  author    = {Zhu, Yixuan and Elbattah, Mahmoud},
+  journal   = {BioMedInformatics},
+  volume    = {5},
+  number    = {4},
+  pages     = {63},
+  year      = {2025},
+  doi       = {10.3390/biomedinformatics5040063}
+}
+@article{ref_a2,
+  title     = {Deep learning based detection of endometriosis lesions in laparoscopic images with 5-fold cross-validation},
+  author    = {Zaidi, Shujaat Ali and Chouvatut, Varin and Phongnarisorn, Chailert and Praserttitipong, Dussadee},
+  journal   = {Intelligence-Based Medicine},
+  year      = {2025},
+  doi       = {10.1016/j.ibmed.2025.100230},
+  note      = {https://www.sciencedirect.com/science/article/pii/S266652122500033X},
+  volume  = {11}, pages = {100230}
+}
+@article{ref_a3,
+  title     = {Endometriosis detection and localization in laparoscopic gynecology},
+  author    = {Leibetseder, Andreas and Schoeffmann, Klaus and Keckstein, Jörg and Keckstein, Simon},
+  journal   = {Multimedia Tools and Applications},
+  publisher = {Springer},
+  year      = {2022},
+  doi       = {10.1007/s11042-021-11730-1},
+  volume  = {81}, number = {5}, pages = {6191--6215}
+}
+@inproceedings{ref_a4,
+  title     = {{GLENDA}: Gynecologic Laparoscopy Endometriosis Dataset},
+  author    = {Leibetseder, Andreas and Kletz, Sabrina and Schoeffmann, Klaus and Keckstein, Simon and Keckstein, Jörg},
+  booktitle = {Proc. Int. Conf. on Multimedia Modeling (MMM)},
+  series    = {LNCS},
+  publisher = {Springer},
+  year      = {2020},
+  doi       = {10.1007/978-3-030-37734-2_36},
+  volume    = {11962}, pages = {439--450}
+}
+@misc{ref_a5,
+  title        = {Deep Learning Improves Accuracy of Laparoscopic Imaging Classification
+                  for Endometriosis Diagnosis},
+  author       = {{VERIFY authors}},
+  howpublished = {Preprints.org preprint},
+  year         = {2023},
+  doi          = {10.20944/preprints202312.0475.v1},
+  note         = {Not peer reviewed}
+}
+@article{ref_a6,
+  title     = {Object Detection in Laparoscopic Surgery: A Comparative Study of Deep Learning Models on a Custom Endometriosis Dataset},
+  author    = {Bondarenko, Andrey and Jumutc, Vilen and Netter, Antoine and Duchateau, Fanny and Abrão, Henrique Mendonca and Noorzadeh, Saman and Giacomello, Giuseppe and Ferrari, Filippo and Bourdel, Nicolas and Kirk, Ulrik Bak and Bļizņuks, Dmitrijs},
+  journal   = {Diagnostics},
+  volume    = {15},
+  pages     = {1254},
+  year      = {2025},
+  doi       = {10.3390/diagnostics15101254}
+}
+@article{ref_a7,
+  title     = {Automated prediction of endometriosis using deep learning},
+  author    = {Visalaxi, S. and Muthu, T. Sudalai},
+  journal   = {International Journal of Nonlinear Analysis and Applications},
+  volume    = {12},
+  number    = {2},
+  pages     = {2403--2416},
+  year      = {2021},
+  doi       = {10.22075/ijnaa.2021.5383}
+}
+@article{ref_a8,
+  title     = {Automatic segmentation of deep endometriosis in the rectosigmoid using deep learning},
+  author    = {Figueredo, Weslley Kelson Ribeiro and Silva, Aristófanes Corrêa and de Paiva, Anselmo Cardoso and Diniz, João Otávio Bandeira and Brandão, Alice and Oliveira, Marco Aurelio Pinho},
+  journal   = {Image and Vision Computing},
+  publisher = {Elsevier},
+  year      = {2024},
+  doi       = {10.1016/j.imavis.2024.105261},
+  note      = {https://www.sciencedirect.com/science/article/abs/pii/S0262885624003664}
+}
+@article{ref_a9,
+  title     = {SWOT Analysis of Vision Transformers (ViTs) for Automated Diagnosis of Endometriosis from Laparoscopic Videos: Feasibility and Ethical Challenges},
+  author    = {Haqiqat, Parnian and Amininejad, Amir and Rouzbeh, Fardis and Gholami, Kosar and Gholami, Hanieh},
+  journal   = {InfoScience Trends},
+  year      = {2025},
+  doi       = {10.61186/ist.202502.05.02},
+  note      = {https://www.isjtrend.com/article_220048.html},
+  volume  = {2}, number = {5}, pages = {11--22}
+}
+@article{ref_a10,
+  title   = {Initial Results in the Automatic Visual Recognition of Endometriosis Lesions},
+  author  = {Netter, Antoine and Noorzadeh, Saman and Duchateau, Fanny and
+             Abrao, Henrique and Desternes, Julie and Peyras, Julie and
+             Pouly, Jean-Luc and Abr{\~a}o, Maur{\'i}cio Sim{\~o}es},
+  journal = {Journal of Minimally Invasive Gynecology},
+  volume  = {32}, number = {12}, pages = {1118--1125}, year = {2025},
+  doi     = {10.1016/j.jmig.2025.08.027}
+}
+
+% ---------- B: Ultrasound ----------
+@inproceedings{ref_b1,
+  title     = {Augmenting endometriosis analysis from ultrasound data using deep learning},
+  author    = {Balica, Adrian and Dai, Jianchao and Piiwaa, Kelsey and
+               Qi, Xinyue and Green, Alexandra and Phillips, Noelle and
+               Egan, Shawn and Kim, Hyungjun},
+  booktitle = {Medical Imaging 2023: Ultrasonic Imaging and Tomography},
+  series    = {Proc. SPIE}, volume = {12470}, pages = {124700O},
+  publisher = {SPIE}, year = {2023},
+  doi       = {10.1117/12.2653940}
+}
+@article{ref_b4,
+  title     = {Investigating the role of artificial intelligence in the diagnosis and prediction of endometriosis using ultrasound images: a systematic review},
+  author    = {Esmailzadeh, Aynaz and Rashki Kemmak, Asma and Sezavar Dokhtfaroughi, Sara and Rasoulian, Alireza and Mazaheri Habibi, Mohammad Reza},
+  journal   = {Reproductive Health},
+  publisher = {Springer},
+  year      = {2026},
+  doi       = {10.1186/s12978-025-02245-1},
+  volume  = {23}, number = {1}, pages = {31}
+}
+
+% ---------- C: MRI ----------
+@article{ref_c1,
+  title     = {A Multi-Modal Pelvic MRI Dataset for Deep Learning-Based Pelvic Organ Segmentation in Endometriosis},
+  author    = {Liang, Xiaomin and Alpuing Radilla, Linda A. and Khalaj, Kamand and Dawoodally, Haaniya and Mokashi, Chinmay and Guan, Xiaoming and Roberts, Kirk E. and Sheth, Sunil A. and Tammisetti, Varaha S. and Giancardo, Luca},
+  journal   = {Scientific Data},
+  publisher = {Nature},
+  year      = {2025},
+  doi       = {10.1038/s41597-025-05623-3},
+  volume  = {12}, number = {1}, pages = {1292}
+}
+@article{ref_c2,
+  title     = {Development of an AI-based magnetic resonance imaging reading support program (AMP) for deep endometriosis diagnosis},
+  author    = {Shiokawa, Rie and Iwasawa, Junichiro and Tanaka, Yumiko Oishi and Tokuoka, Yuta and Sugawara, Yohei and Hirano, Yuichiro and Takaji, Ryo and Hayakawa, Yayoi and Oda, Keita and Kudo, Yasunori and Li, Miho and Mizuno, Kazue and Ozeki, Kazuhisa and Nishimoto-Kakiuchi, Ayako and Terao, Kimio},
+  journal   = {Scientific Reports},
+  publisher = {Nature},
+  year    = {2026},
+  doi       = {10.1038/s41598-025-30277-x},
+  volume  = {16}, number = {1}, pages = {790},
+  note    = {Published online December 2025; Scientific Reports volume 16 is dated 2026}
+}
+
+% ---------- D: Symptom / tabular ML ----------
+@article{ref_d1,
+  title     = {Self-report symptom-based endometriosis prediction using machine learning},
+  author    = {Goldstein, Anat and Cohen, Shani},
+  journal   = {Scientific Reports},
+  publisher = {Nature},
+  volume    = {13},
+  year      = {2023},
+  doi       = {10.1038/s41598-023-32761-8},
+  number  = {1}, pages = {5499}
+}
+@article{ref_d2,
+  title     = {Machine learning algorithms as new screening approach for patients with endometriosis},
+  author    = {Bendifallah, Sofiane and Puchar, Anne and Suisse, Stéphane and Delbos, Léa and Poilblanc, Mathieu and Descamps, Philippe and Golfier, Francois and Touboul, Cyril and Dabi, Yohann and Daraï, Emile},
+  journal   = {Scientific Reports},
+  publisher = {Nature},
+  volume    = {12},
+  year      = {2022},
+  doi       = {10.1038/s41598-021-04637-2},
+  number  = {1}, pages = {639}
+}
+
+% ---------- E: Reviews / Meta-analyses ----------
+@article{ref_e1,
+  title     = {Artificial Intelligence in Endometriosis Imaging: A Scoping Review},
+  author    = {AlSaad, Rawan and Farrell, Thomas and Elhenidy, Ali and Albasha, Shima and Thomas, Rajat},
+  journal   = {AI},
+  volume    = {7},
+  number    = {2},
+  pages     = {43},
+  year      = {2026},
+  doi       = {10.3390/ai7020043}
+}
+@article{ref_e2,
+  title     = {Diagnostic accuracy of machine learning for endometriosis: a systematic review and meta-analysis},
+  author    = {Zhang, Bingyi and Lv, Xiaoli and Li, Dan and Zhang, Longtao and Ru, Ziyang and Ma, Yuxia},
+  journal   = {Frontiers in Endocrinology},
+  year      = {2026},
+  doi       = {10.3389/fendo.2025.1735567},
+  volume  = {16}, pages = {1735567}
+}
+@article{ref_e3,
+  title     = {Current Status and Future Potential of Machine Learning in Diagnostic Imaging of Endometriosis: A Literature Review},
+  author    = {Shrestha, Palpasa and Shrestha, Bibek and Shrestha, Jati and Chen, Jun},
+  journal   = {Journal of Nepal Medical Association},
+  year      = {2025},
+  doi       = {10.31729/jnma.8897},
+  note      = {https://pmc.ncbi.nlm.nih.gov/articles/PMC12122278/},
+  volume  = {63}, number = {283}, pages = {205--211}
+}
+@article{ref_e4,
+  title     = {Assessing the Utility of Artificial Intelligence in Endometriosis: Promises and Pitfalls},
+  author    = {Dungate, Brie and Tucker, Dwayne R and Goodwin, Emma and Yong, Paul J},
+  journal   = {Women's Health},
+  year      = {2024},
+  doi       = {10.1177/17455057241248121},
+  note      = {https://pmc.ncbi.nlm.nih.gov/articles/PMC11062212/},
+  volume  = {20}, pages = {17455057241248121}
+}
+
+% ---------- M: Classical ML (Lit Review 2.1) ----------
+@article{ref_m1,
+  title     = {Machine Learning-Based Detection of Endometriosis: A Retrospective Study in a Population of Iranian Female Patients},
+  author    = {Nouri, Bijan and Hashemi, Seyed Hamid and Ghadimi, Delaram J. and Roshandel, Sepideh and Akhlaghdoust, Meisam},
+  journal   = {International Journal of Fertility and Sterility},
+  year      = {2024},
+  doi       = {10.22074/ijfs.2024.2009338.1519},
+  note      = {PMID 39564827; PMCID PMC11589974},
+  volume  = {18}, number = {4}, pages = {362--366}
+}
+@article{ref_m2,
+  title     = {Identification and validation of a novel machine learning model for predicting severe pelvic endometriosis: A retrospective study},
+  author    = {Cao, Siqi and Li, Xingzhe and Zheng, Xin and Zhang, Jiaxin and Ji, Ziyao and Liu, Yanjun},
+  journal   = {Scientific Reports},
+  publisher = {Nature},
+  year      = {2025},
+  doi       = {10.1038/s41598-025-96093-5},
+  volume  = {15}, number = {1}, pages = {13621}
+}
+@article{ref_m3,
+  title     = {Machine Learning Classifiers for Endometriosis Using Transcriptomics and Methylomics Data},
+  author    = {Akter, Sadia and Xu, Dong and Nagel, Susan C. and Bromfield, John J. and Pelch, Katherine and Wilshire, Gilbert B. and Joshi, Trupti},
+  journal   = {Frontiers in Genetics},
+  volume    = {10},
+  pages     = {766},
+  year      = {2019},
+  doi       = {10.3389/fgene.2019.00766}
+}
+@article{ref_m4,
+  title     = {Machine learning-based integrated identification of predictive combined diagnostic biomarkers for endometriosis},
+  author    = {Zhang, Haolong and Zhang, Haoling and Yang, Huadi and Shuid, Ahmad Naqib and Sandai, Doblin and Chen, Xingbei},
+  journal   = {Frontiers in Genetics},
+  year      = {2023},
+  doi       = {10.3389/fgene.2023.1290036},
+  volume  = {14}, pages = {1290036}
+}
+
+% ---------- X: Explainable AI (methods) ----------
+@inproceedings{ref_gradcam,
+  title     = {Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization},
+  author    = {Selvaraju, Ramprasaath R. and Cogswell, Michael and Das, Abhishek and Vedantam, Ramakrishna and Parikh, Devi and Batra, Dhruv},
+  booktitle = {Proc. IEEE International Conference on Computer Vision (ICCV)},
+  pages     = {618--626},
+  year      = {2017},
+  doi       = {10.1109/iccv.2017.74}
+}
+@inproceedings{ref_shap,
+  title     = {A Unified Approach to Interpreting Model Predictions},
+  author    = {Lundberg, Scott M. and Lee, Su-In},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {30},
+  pages     = {4765--4774},
+  year      = {2017},
+  note      = {arXiv:1705.07874}
+}
+@inproceedings{ref_lime,
+  title     = {``Why Should I Trust You?'': Explaining the Predictions of Any Classifier},
+  author    = {Ribeiro, Marco Tulio and Singh, Sameer and Guestrin, Carlos},
+  booktitle = {Proc. 22nd ACM SIGKDD Int. Conf. on Knowledge Discovery and Data Mining (KDD)},
+  pages     = {1135--1144},
+  year      = {2016},
+  doi       = {10.1145/2939672.2939778}
+}
+@article{ref_x4,
+  title     = {Explainable artificial intelligence for medical imaging systems using deep learning: a comprehensive review},
+  author    = {Houssein, Essam H. and Gamal, Amr M. and Younis, Eman M. G. and Mohamed, Ebtsam},
+  journal   = {Cluster Computing},
+  publisher = {Springer},
+  year      = {2025},
+  doi       = {10.1007/s10586-025-05281-5},
+  volume  = {28}, number = {7}, pages = {469}
+}
+@article{ref_x5,
+  title     = {Beyond Post hoc Explanations: A Comprehensive Framework for Accountable AI in Medical Imaging Through Transparency, Interpretability, and Explainability},
+  author    = {Singh, Yashbir and Hathaway, Quincy A. and Keishing, Varekan and Salehi, Sara and Wei, Yujia and Horvat, Natally and Vera-Garcia, Diana V. and Choudhary, Ashok and Mula Kh, Almurtadha and Quaia, Emilio and Andersen, Jesper B},
+  journal   = {Bioengineering},
+  year      = {2025},
+  doi       = {10.3390/bioengineering12080879},
+  note      = {https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12383817/},
+  volume  = {12}, number = {8}, pages = {879}
+}
+
+% ---------- R: Architectures ----------
+@inproceedings{ref_resnet,
+  title     = {Deep Residual Learning for Image Recognition},
+  author    = {He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  booktitle = {Proc. IEEE Conf. on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {770--778},
+  year      = {2016},
+  doi       = {10.1109/CVPR.2016.90}
+}
+@inproceedings{ref_efficientnet,
+  title     = {{EfficientNet}: Rethinking Model Scaling for Convolutional Neural Networks},
+  author    = {Tan, Mingxing and Le, Quoc V.},
+  booktitle = {Proc. 36th Int. Conf. on Machine Learning (ICML)},
+  series    = {PMLR},
+  volume    = {97},
+  pages     = {6105--6114},
+  year      = {2019},
+  note      = {arXiv:1905.11946}
+}
+@inproceedings{ref_vit,
+  title     = {An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale},
+  author    = {Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and Weissenborn, Dirk and Zhai, Xiaohua and Unterthiner, Thomas and Dehghani, Mostafa and Minderer, Matthias and Heigold, Georg and Gelly, Sylvain and Uszkoreit, Jakob and Houlsby, Neil},
+  booktitle = {Int. Conf. on Learning Representations (ICLR)},
+  year      = {2021},
+  note      = {arXiv:2010.11929}
+}
+
+@inproceedings{ref_rollout,
+  title     = {Quantifying Attention Flow in Transformers},
+  author    = {Abnar, Samira and Zuidema, Willem},
+  booktitle = {Proc. 58th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  pages     = {4190--4197},
+  year      = {2020},
+  doi       = {10.18653/v1/2020.acl-main.385}
+}
+
+@article{ref_eshre,
+  title     = {{ESHRE} guideline: endometriosis},
+  author    = {Becker, Christian M and Bokor, Attila and Heikinheimo, Oskari and
+               Horne, Andrew and Jansen, Femke and Kiesel, Ludwig and King, Kathleen and
+               Kvaskoff, Marina and Nap, Annemiek and Petersen, Katrine and
+               Saridogan, Ertan and Tomassetti, Carla and van Hanegem, Nehalennia and
+               Vulliemoz, Nicolas and Vermeulen, Nathalie},
+  journal   = {Human Reproduction Open},
+  volume    = {2022}, number = {2}, pages = {hoac009}, year = {2022},
+  doi       = {10.1093/hropen/hoac009},
+  note      = {ESHRE Endometriosis Guideline Group}
+}
+
+@misc{ref_who,
+  title        = {Endometriosis},
+  author       = {{World Health Organization}},
+  howpublished = {WHO Fact Sheet, updated 15 October 2025},
+  year         = {2025},
+  note         = {https://www.who.int/news-room/fact-sheets/detail/endometriosis, accessed 16 October 2026}
+}
+
+@misc{ref_glenda_web,
+  title        = {{GLENDA} v1.5 release page: dataset statistics and licence},
+  author       = {{ITEC, Klagenfurt University}},
+  howpublished = {https://ftp.itec.aau.at/datasets/GLENDA/},
+  year         = {2020},
+  note         = {Accessed 16 October 2026}
+}

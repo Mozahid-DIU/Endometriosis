@@ -8,6 +8,13 @@
 > Before citing in your final paper, **verify each number against the full text/PDF**.
 > This table is your *Related Work* raw material + gap-finding tool.
 
+> 📌 **Status.** These are the Step-3 survey notes, kept as raw material. The Related
+> Work section that was actually written is `paper/sections/03_related_work.md`, with
+> every citation checked in `paper/reference_check.md`; its bibliography is wider than
+> the 24 papers below (it adds omics and clinical-record work, the ViT and attention-
+> rollout papers, and XAI surveys). The one place where these notes no longer match
+> the paper is the *Suggested direction* at the bottom — see the correction there.
+
 ---
 
 ## Category A — Laparoscopy / GLENDA-based (most relevant to you)
@@ -92,6 +99,32 @@ This is:
 - ✅ Clear novelty (balanced benchmark + XAI + imbalance study)
 - ✅ Backed by proven methods (low risk)
 - ✅ Publishable at a conference / preprint in your 1–2 month window
+
+> 🔴 **Superseded — this is not the direction the paper took.** **G1 was dropped**:
+> there is no comparison of imbalance-handling techniques. The dataset is balanced by
+> undersampling only (all 373 pathology frames + 373 no-pathology frames), and that is
+> described as an evaluation choice with its own limitations, not as a contribution.
+> The gaps the paper actually claims, from
+> `paper/sections/03_related_work.md`, are:
+>
+> 1. CNN-vs-transformer comparisons are made under protocols that differ between
+>    papers, so reported differences may reflect the protocol — hence one grouped
+>    cross-validation for all three architectures, with the grouping unit stated and
+>    uncertainty quantified per surgery rather than per frame.
+> 2. Explanation quality is reported qualitatively or not at all — hence saliency
+>    scored against the expert masks on every pathology frame, **and against a chance
+>    level and a centre-of-image prior**, without which an IoU cannot be read. (This
+>    sharpens G3: the gap is not that Grad-CAM is under-reported, it is that it is
+>    under-*validated*.)
+> 3. Surgery-level leakage is easy to introduce and rarely documented — hence the
+>    report of what grouping by segment folder rather than by recording does to the
+>    ranking.
+>
+> G2, G4 and G5 survive in modified form: the head-to-head comparison is the study's
+> spine (G2), reproducibility is served by the released manifest and per-frame
+> predictions (G4), and EfficientNet-B0's efficiency becomes a finding rather than a
+> premise (G5) — it is the weakest classifier here but the only model whose
+> explanations beat the centre prior.
 
 ---
 

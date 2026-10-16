@@ -9,7 +9,7 @@ fig_cv_auc.png
 fig_localization.png
     Explanation quality against the two reference levels a saliency claim has to
     clear: an area-matched random region, and a centred Gaussian prior. Without
-    them an IoU of 0.148 is unreadable.
+    them an IoU figure is unreadable.
 
 Palette: categorical slots 1-3 of the reference palette, validated for colour
 vision deficiency (worst adjacent pair dE 9.2 deutan). Every value is also
@@ -71,18 +71,19 @@ def tidy(ax) -> None:
 
 
 def figure_cv_auc() -> None:
-    folds = read_csv("cv_fold_metrics.csv")
+    folds = read_csv("cv_fold_metrics_v3.csv")
     per_model: dict[str, dict[int, float]] = {m: {} for m in MODELS}
     for r in folds:                                   # later rows win (a re-run fold)
         if r["model"] in per_model:
             per_model[r["model"]][int(r["fold"])] = float(r["AUC"])
 
+    # surgery-level intervals, matching the manuscript; the frame-level ones in
+    # cv_analysis_summary.csv are about half as wide and would contradict the text
     pooled, ci = {}, {}
-    for r in read_csv("cv_analysis_summary.csv"):
-        if r["section"] == "pooled_oof" and r["metric"] == "AUC":
-            pooled[r["model"]] = float(r["value"])
-            lo, hi = r["spread_or_ci"].strip("[]").split(",")
-            ci[r["model"]] = (float(lo), float(hi))
+    for r in read_csv("cluster_bootstrap_classification.csv"):
+        if r["kind"] == "auc_ci":
+            pooled[r["model_A"]] = float(r["value"])
+            ci[r["model_A"]] = (float(r["ci_low"]), float(r["ci_high"]))
     single = {r[""]: float(r["AUC"]) for r in read_csv("test_results.csv")}
 
     fig, ax = plt.subplots(figsize=(7.0, 2.9))
@@ -107,7 +108,7 @@ def figure_cv_auc() -> None:
     ax.text(0.0, 1.06, "each dot = one of the 5 folds      "
                        "◇ = old single split      ● = pooled over all 746 images",
             transform=ax.transAxes, fontsize=8, color=INK_SOFT, ha="left", va="bottom")
-    ax.set_xlim(0.80, 0.99)
+    ax.set_xlim(0.72, 1.0)
     ax.set_ylim(-0.75, 2.6)
     ax.set_yticks([len(MODELS) - 1 - i - 0.04 for i in range(len(MODELS))])
     ax.set_yticklabels(MODELS, fontsize=9.5, color=INK)
@@ -201,14 +202,13 @@ def figure_localization() -> None:
 def figure_roc() -> None:
     """ROC from the pooled out-of-fold predictions, not the single split."""
     preds: dict[str, list[tuple[int, float]]] = {m: [] for m in MODELS}
-    for r in read_csv("cv_predictions.csv"):
+    for r in read_csv("cv_predictions_v3.csv"):
         if r["model"] in preds:
             preds[r["model"]].append((int(r["y_true"]), float(r["prob"])))
     ci = {}
-    for r in read_csv("cv_analysis_summary.csv"):
-        if r["section"] == "pooled_oof" and r["metric"] == "AUC":
-            lo, hi = r["spread_or_ci"].strip("[]").split(",")
-            ci[r["model"]] = (float(r["value"]), float(lo), float(hi))
+    for r in read_csv("cluster_bootstrap_classification.csv"):
+        if r["kind"] == "auc_ci":
+            ci[r["model_A"]] = (float(r["value"]), float(r["ci_low"]), float(r["ci_high"]))
 
     fig, ax = plt.subplots(figsize=(4.3, 3.9))
     ax.plot([0, 1], [0, 1], color=GRID, lw=1.2, ls=(0, (4, 3)), zorder=1)
@@ -244,7 +244,7 @@ def figure_roc() -> None:
 def figure_confusion() -> None:
     """Pooled out-of-fold confusion matrices, one per model."""
     counts = {m: np.zeros((2, 2), dtype=int) for m in MODELS}
-    for r in read_csv("cv_predictions.csv"):
+    for r in read_csv("cv_predictions_v3.csv"):
         if r["model"] in counts:
             counts[r["model"]][int(r["y_true"]), int(r["pred"])] += 1
 
@@ -282,7 +282,7 @@ def figure_error_clusters() -> None:
     is the argument for case-wise splitting and the lead for the discussion."""
     per_group: dict[str, dict[str, list[int]]] = {}
     label: dict[str, str] = {}
-    for r in read_csv("cv_predictions.csv"):
+    for r in read_csv("cv_predictions_v3.csv"):
         g = group_key(r)
         per_group.setdefault(g, {m: [] for m in MODELS})
         per_group[g][r["model"]].append(int(r["pred"] != r["y_true"]))
@@ -329,7 +329,7 @@ def figure_dataset() -> None:
     surgeries are kept together. This is why AUC, not accuracy, is reported."""
     fold_rows: dict[int, list[int]] = {}
     groups: dict[int, set[str]] = {}
-    for r in read_csv("cv_predictions.csv"):
+    for r in read_csv("cv_predictions_v3.csv"):
         if r["model"] != MODELS[0]:
             continue
         f = int(r["fold"])

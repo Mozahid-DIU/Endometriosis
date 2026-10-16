@@ -8,18 +8,19 @@ actually want is to *new surgeries*, so the resampling unit must be the surgery.
 
 This script redoes, with a cluster (group-level) bootstrap:
   - pooled out-of-fold AUC and its CI, per model
-  - paired AUC differences between models, with Holm-corrected p-values
-  - McNemar's test, Holm-corrected across the three pairs
-  - the localization metrics and their CIs
+  - paired AUC and accuracy differences between models, Holm-corrected
+  - McNemar's test, reported frame-level and used for no claim
+
+Localization is handled by analyze_cv_localization.py, which works on the current
+373-frame out-of-fold scores; this script no longer touches it.
 
 Frame-level intervals are printed next to the cluster-level ones so the cost of
 the correction is visible.
 
 Usage (from the repo root):
     python scripts/cluster_bootstrap.py
-Outputs:
+Output:
     results/cluster_bootstrap_classification.csv
-    results/cluster_bootstrap_localization.csv
 """
 from __future__ import annotations
 
@@ -36,11 +37,8 @@ from statistical_analysis import fast_auc
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "results"
-PRED = RESULTS / "cv_predictions.csv"
-GRADCAM = RESULTS / "gradcam_per_image.csv"
-ROLLOUT = RESULTS / "vit_rollout_per_image.csv"
+PRED = RESULTS / "cv_predictions_v3.csv"
 OUT_CLS = RESULTS / "cluster_bootstrap_classification.csv"
-OUT_LOC = RESULTS / "cluster_bootstrap_localization.csv"
 
 MODELS = ["ResNet50", "EfficientNet-B0", "ViT-B/16"]
 N_BOOT = 10_000
@@ -144,7 +142,7 @@ def classification() -> list[list]:
                           for i in g_samples])
         lo, hi = ci(diffs)
         p_auc = 2 * min(float(np.mean(diffs <= 0)), float(np.mean(diffs >= 0)))
-        p_auc = min(max(p_auc, 1.0 / N_BOOT), 1.0)
+        p_auc = min(max(p_auc, 1.0 / (N_BOOT + 1)), 1.0)
 
         ca, cb = preds[a] == y, preds[b] == y
         only_a = int(np.sum(ca & ~cb))
@@ -158,7 +156,7 @@ def classification() -> list[list]:
         acc_boots = np.array([ca[i].mean() - cb[i].mean() for i in g_samples])
         acc_lo, acc_hi = ci(acc_boots)
         p_acc = 2 * min(float(np.mean(acc_boots <= 0)), float(np.mean(acc_boots >= 0)))
-        p_acc = min(max(p_acc, 1.0 / N_BOOT), 1.0)
+        p_acc = min(max(p_acc, 1.0 / (N_BOOT + 1)), 1.0)
 
         raw_auc.append(p_auc); raw_mc.append(p_acc)
         detail.append((a, b, observed, lo, hi, only_a, only_b,
@@ -175,146 +173,25 @@ def classification() -> list[list]:
               f"p_raw={p_acc_raw:.4g}  p_holm={p_acc:.4g}   (surgery-level)")
         print(f"    discordant frames {only_a}/{only_b}, McNemar p={p_mc_raw:.4g} "
               f"(frame-level, ignores clustering)")
-        out.append(["pairwise", a, b, f"{observed:+.4f}", f"{lo:+.4f}", f"{hi:+.4f}",
-                    f"raw={p_auc_raw:.4g}; holm={p_auc:.4g}", verdict,
+        out.append(["pairwise", a, b, f"{observed:+.4f}", "", "", f"{lo:+.4f}", f"{hi:+.4f}",
                     f"{only_a}/{only_b}; McNemar frame-level p={p_mc_raw:.4g}",
                     f"dAcc {acc_diff:+.4f} [{acc_lo:+.4f},{acc_hi:+.4f}] "
-                    f"raw={p_acc_raw:.4g} holm={p_acc:.4g}"])
+                    f"raw={p_acc_raw:.4g} holm={p_acc:.4g}; "
+                    f"dAUC raw={p_auc_raw:.4g} holm={p_auc:.4g} ({verdict})"])
     return out
-
-
-def localization() -> list[list]:
-    gc = list(csv.DictReader(open(GRADCAM, encoding="utf-8")))
-    roll = {r["filename"]: r for r in csv.DictReader(open(ROLLOUT, encoding="utf-8"))}
-    files = [r["filename"] for r in gc]
-    groups = np.array([case_of(f) for f in files])
-    print(f"\n=== localization: {len(files)} frames from {len(set(groups))} surgeries ===")
-
-    methods: dict[str, dict[str, np.ndarray]] = {}
-    for m in MODELS:
-        methods[m] = {k: np.array([float(r[f"{m}_{k}"]) if k != "pointing"
-                                   else float(int(r[f"{m}_pointing"])) for r in gc])
-                      for k in ("IoU", "pointing", "coverage")}
-    methods["ViT-B/16 (attention rollout)"] = {
-        "IoU": np.array([float(roll[f]["rollout_IoU"]) for f in files]),
-        "pointing": np.array([float(roll[f]["rollout_pointing"]) for f in files]),
-        "coverage": np.array([float(roll[f]["rollout_coverage"]) for f in files])}
-
-    # every frame here is pathology, so draw from the case list directly
-    by_case: dict[str, list[int]] = defaultdict(list)
-    for i, g in enumerate(groups):
-        by_case[g].append(i)
-    cases = list(by_case)
-    rng = np.random.default_rng(SEED)
-    samples = [np.concatenate([by_case[c] for c in rng.choice(cases, len(cases), replace=True)])
-               for _ in range(N_BOOT)]
-
-    out: list[list] = []
-    for name, vals in methods.items():
-        line = [name]
-        for metric in ("IoU", "pointing", "coverage"):
-            point = float(vals[metric].mean())
-            lo, hi = ci(np.array([vals[metric][i].mean() for i in samples]))
-            line.append(f"{metric} {point:.3f} [{lo:.3f}-{hi:.3f}]")
-            out.append(["mean_ci", name, metric, f"{point:.4f}", f"{lo:.4f}", f"{hi:.4f}", ""])
-        print("  " + " | ".join(line))
-
-    print("\n  paired differences in IoU (surgery-level resampling):")
-    names = list(methods)
-    raw, detail = [], []
-    for a, b in combinations(names, 2):
-        d = methods[a]["IoU"] - methods[b]["IoU"]
-        observed = float(d.mean())
-        boots = np.array([d[i].mean() for i in samples])
-        lo, hi = ci(boots)
-        p = 2 * min(float(np.mean(boots <= 0)), float(np.mean(boots >= 0)))
-        raw.append(min(max(p, 1.0 / N_BOOT), 1.0))
-        detail.append((a, b, observed, lo, hi))
-    for (a, b, observed, lo, hi), p in zip(detail, holm(raw)):
-        verdict = "significant" if p < ALPHA else "not significant"
-        print(f"    {a:30s} - {b:30s} {observed:+.4f} [{lo:+.4f},{hi:+.4f}] "
-              f"p_holm={p:.4g} ({verdict})")
-        out.append(["pairwise_IoU", a, b, f"{observed:+.4f}", f"{lo:+.4f}", f"{hi:+.4f}",
-                    f"{p:.4g} ({verdict})"])
-    return out
-
-
-def baselines(out: list[list]) -> None:
-    """The same surgery-level resampling for the two reference levels, so the
-    chance comparisons are not quoted at a different standard from the rest."""
-    import numpy as np
-    from PIL import Image
-
-    gc = list(csv.DictReader(open(GRADCAM, encoding="utf-8")))
-    roll = {r["filename"]: r for r in csv.DictReader(open(ROLLOUT, encoding="utf-8"))}
-    mask_dir = ROOT / "data" / "masks" / "test" / "endometriosis"
-
-    files = [r["filename"] for r in gc]
-    groups = np.array([case_of(f) for f in files])
-    mask_area, centre_iou = [], []
-    yy, xx = np.mgrid[0:224, 0:224]
-    centre = np.exp(-(((xx - 112) ** 2 + (yy - 112) ** 2) / (2 * (0.25 * 224) ** 2)))
-    centre = (centre - centre.min()) / (centre.max() - centre.min())
-    centre_region = (centre >= 0.5).astype(np.uint8)
-    for f in files:
-        m = np.array(Image.open(mask_dir / f"{Path(f).stem}.png").convert("L")
-                     .resize((224, 224)))
-        m = (m > 0).astype(np.uint8)
-        mask_area.append(float(m.mean()))
-        union = (centre_region | m).sum()
-        centre_iou.append(float((centre_region & m).sum() / union) if union else 0.0)
-    mask_area = np.asarray(mask_area)
-    centre_iou = np.asarray(centre_iou)
-
-    methods = {m: (np.array([float(r[f"{m}_IoU"]) for r in gc]),
-                   np.array([float(r[f"{m}_area"]) for r in gc])) for m in MODELS}
-    methods["ViT-B/16 (attention rollout)"] = (
-        np.array([float(roll[f]["rollout_IoU"]) for f in files]),
-        np.array([float(roll[f]["rollout_area"]) for f in files]))
-
-    by_case: dict[str, list[int]] = defaultdict(list)
-    for i, g in enumerate(groups):
-        by_case[g].append(i)
-    cases = list(by_case)
-    rng = np.random.default_rng(SEED)
-    samples = [np.concatenate([by_case[c] for c in rng.choice(cases, len(cases), replace=True)])
-               for _ in range(N_BOOT)]
-
-    print("\n  against chance and the centre prior (surgery-level resampling):")
-    raw, detail = [], []
-    for name, (iou_vals, areas) in methods.items():
-        floor = (areas * mask_area) / (areas + mask_area - areas * mask_area)
-        for label, reference in (("area-matched random", floor), ("centre prior", centre_iou)):
-            d = iou_vals - reference
-            boots = np.array([d[i].mean() for i in samples])
-            lo, hi = ci(boots)
-            p = 2 * min(float(np.mean(boots <= 0)), float(np.mean(boots >= 0)))
-            raw.append(min(max(p, 1.0 / N_BOOT), 1.0))
-            detail.append((name, label, float(d.mean()), lo, hi))
-    for (name, label, diff, lo, hi), p in zip(detail, holm(raw)):
-        verdict = ("above" if diff > 0 and p < ALPHA else
-                   "below" if diff < 0 and p < ALPHA else "indistinguishable")
-        print(f"    {name:30s} vs {label:20s} {diff:+.4f} [{lo:+.4f},{hi:+.4f}] "
-              f"p_holm={p:.4g} -> {verdict}")
-        out.append(["vs_" + label.replace(" ", "_"), name, label, f"{diff:+.4f}",
-                    f"{lo:+.4f}", f"{hi:+.4f}", f"p_holm={p:.4g} ({verdict})"])
 
 
 def main() -> None:
     cls_rows = classification()
-    loc_rows = localization()
-    baselines(loc_rows)
     with open(OUT_CLS, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
+        # "auc_ci" rows carry both interval widths; "pairwise" rows carry the
+        # surgery-level interval in ci_low/ci_high and leave the frame columns empty
         w.writerow(["kind", "model_A", "model_B", "value", "frame_ci_low",
-                    "frame_ci_high", "cluster_ci_low", "cluster_ci_high",
-                    "mcnemar_counts", "mcnemar_p_holm"])
+                    "frame_ci_high", "ci_low", "ci_high",
+                    "discordant_and_mcnemar", "accuracy_difference"])
         w.writerows(cls_rows)
-    with open(OUT_LOC, "w", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
-        w.writerow(["kind", "method_A", "method_B", "value", "ci_low", "ci_high", "note"])
-        w.writerows(loc_rows)
-    print(f"\nWrote {OUT_CLS.relative_to(ROOT)} and {OUT_LOC.relative_to(ROOT)}")
+    print(f"\nWrote {OUT_CLS.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

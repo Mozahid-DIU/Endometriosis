@@ -33,8 +33,8 @@ from scipy.stats import binomtest
 from statistical_analysis import fast_auc, fast_metrics
 
 ROOT = Path(__file__).resolve().parent.parent
-FOLD_CSV = ROOT / "results" / "cv_fold_metrics.csv"
-PRED_CSV = ROOT / "results" / "cv_predictions.csv"
+FOLD_CSV = ROOT / "results" / "cv_fold_metrics_v3.csv"
+PRED_CSV = ROOT / "results" / "cv_predictions_v3.csv"
 SINGLE_CSV = ROOT / "results" / "test_results.csv"
 OUT_SUMMARY = ROOT / "results" / "cv_analysis_summary.csv"
 OUT_PAIRWISE = ROOT / "results" / "cv_analysis_pairwise.csv"

@@ -52,7 +52,7 @@ CANONICAL_NO_DOI = {"ref_vit", "ref_shap", "ref_efficientnet"}
 
 # Web sources (standards bodies, fact sheets) have no DOI and are not in
 # Crossref; they are cited by organisation, title and access date instead.
-WEB_SOURCES = {"ref_who"}
+WEB_SOURCES = {"ref_who", "ref_glenda_web"}
 
 
 def field(body: str, name: str) -> str:
@@ -171,7 +171,8 @@ def parse_bib() -> list[dict]:
 def check_entry(e: dict) -> dict:
     """Returns the entry plus the Crossref verdict and the real metadata."""
     result = {**e, "status": "", "found_title": "", "found_authors": "",
-              "found_journal": "", "found_year": "", "found_doi": "", "similarity": ""}
+              "found_journal": "", "found_year": "", "found_doi": "", "similarity": "",
+              "warnings": ""}
 
     if e["key"] in CANONICAL_NO_DOI:
         result["status"] = "CANONICAL (no DOI by venue)"
@@ -195,6 +196,31 @@ def check_entry(e: dict) -> dict:
         # looks like a mismatch. If the first author matches, it is the same paper.
         author_ok = (first_surname(e["author"]) and
                      first_surname(e["author"]) == first_surname(authors_of(item)))
+        # Crossref carries three signals a title match cannot see
+        warnings = []
+        kind = item.get("type", "")
+        if kind in {"posted-content", "peer-review", "component"}:
+            warnings.append(f"type is '{kind}', not a research article")
+        page = item.get("page", "")
+        if "-" in page:
+            try:
+                first, last = (int(x) for x in page.split("-", 1))
+                if last - first <= 1:
+                    warnings.append(f"spans {last - first + 1} page(s) - possibly a "
+                                    f"letter, comment or editorial")
+            except ValueError:
+                pass
+        found_journal = container_of(item)
+        bib_journal = e.get("journal") or e.get("booktitle") or ""
+        if bib_journal and found_journal and \
+                similarity(bib_journal, found_journal) < 0.5 and \
+                "VERIFY" not in bib_journal:
+            warnings.append(f"venue differs: bib says '{bib_journal}', "
+                            f"Crossref says '{found_journal}'")
+        if e.get("year") and year_of(item) and e["year"] != year_of(item):
+            warnings.append(f"year differs: bib {e['year']}, Crossref {year_of(item)}")
+        result["warnings"] = "; ".join(warnings)
+
         result.update({
             "found_title": title_of(item),
             "found_authors": authors_of(item),
@@ -202,7 +228,8 @@ def check_entry(e: dict) -> dict:
             "found_year": year_of(item),
             "found_doi": item.get("DOI", ""),
             "similarity": f"{sim:.2f}",
-            "status": ("VERIFIED" if sim >= TITLE_MATCH_OK else
+            "status": ("NEEDS A LOOK" if warnings else
+                       "VERIFIED" if sim >= TITLE_MATCH_OK else
                        "VERIFIED (short title in Crossref)" if author_ok else
                        "TITLE MISMATCH" if sim >= TITLE_MATCH_MAYBE else
                        "WRONG DOI"),
@@ -244,11 +271,13 @@ def main() -> None:
         r = check_entry(e)
         print(f"    -> {r['status']}"
               + (f" (title match {r['similarity']})" if r["similarity"] else ""))
+        if r.get("warnings"):
+            print(f"       ! {r['warnings']}")
         results.append(r)
 
-    fields = ["key", "status", "similarity", "title", "found_title", "author",
-              "found_authors", "journal", "found_journal", "year", "found_year",
-              "doi", "found_doi", "note"]
+    fields = ["key", "status", "similarity", "warnings", "title", "found_title",
+              "author", "found_authors", "journal", "found_journal", "year",
+              "found_year", "doi", "found_doi", "note"]
     with open(OUT_CSV, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
         w.writeheader()
@@ -274,6 +303,7 @@ def main() -> None:
         "VERIFIED (short title in Crossref)": "DOI resolves, first author matches, Crossref just stores a shorter title - fine",
         "CANONICAL (no DOI by venue)": "ICML/ICLR/NeurIPS paper cited from its canonical venue; no DOI exists - fine",
         "WEB SOURCE (cited by URL and access date)": "standards body or fact sheet; no DOI by nature - fine",
+        "NEEDS A LOOK": "the DOI resolves, but Crossref disagrees with the entry - read the warning",
     }
     for status, group in sorted(by_status.items(), key=lambda kv: -len(kv[1])):
         lines.append(f"| {status} | {len(group)} | {meaning.get(status, '')} |")
