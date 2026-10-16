@@ -50,6 +50,10 @@ ENTRY_RE = re.compile(r"@(\w+)\s*\{\s*([^,]+),(.*?)\n\}", re.DOTALL)
 # only produces false alarms.
 CANONICAL_NO_DOI = {"ref_vit", "ref_shap", "ref_efficientnet"}
 
+# Web sources (standards bodies, fact sheets) have no DOI and are not in
+# Crossref; they are cited by organisation, title and access date instead.
+WEB_SOURCES = {"ref_who"}
+
 
 def field(body: str, name: str) -> str:
     """Pull one brace-delimited bibtex field, tolerating nested braces."""
@@ -173,6 +177,10 @@ def check_entry(e: dict) -> dict:
         result["status"] = "CANONICAL (no DOI by venue)"
         return result
 
+    if e["key"] in WEB_SOURCES:
+        result["status"] = "WEB SOURCE (cited by URL and access date)"
+        return result
+
     if e["doi"]:
         data = fetch(CROSSREF_WORK + urllib.parse.quote(e["doi"]))
         time.sleep(REQUEST_PAUSE)
@@ -265,6 +273,7 @@ def main() -> None:
         "RESOLVES (not in Crossref)": "the DOI resolves at doi.org but is not in Crossref's index - fine",
         "VERIFIED (short title in Crossref)": "DOI resolves, first author matches, Crossref just stores a shorter title - fine",
         "CANONICAL (no DOI by venue)": "ICML/ICLR/NeurIPS paper cited from its canonical venue; no DOI exists - fine",
+        "WEB SOURCE (cited by URL and access date)": "standards body or fact sheet; no DOI by nature - fine",
     }
     for status, group in sorted(by_status.items(), key=lambda kv: -len(kv[1])):
         lines.append(f"| {status} | {len(group)} | {meaning.get(status, '')} |")
