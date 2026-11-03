@@ -84,8 +84,8 @@ decision support has something to offer.
 Deep learning has been applied to this problem from several directions.
 Convolutional networks pretrained on natural images have been fine-tuned to
 classify laparoscopic frames as pathological or not [ref_a2], [ref_a7] and, in a
-preprint, [ref_a5],
-region-based detectors have been used to localize lesions [ref_a3], [ref_a6], and
+preprint, [ref_a5].
+Region-based detectors have been used to localize lesions [ref_a3], [ref_a6], and
 work has begun on recognition during live procedures [ref_a10]. Most of this work
 uses GLENDA, the public gynecologic laparoscopy dataset, which provides
 expert-annotated lesion masks alongside frame labels [ref_a4]. Vision transformers
@@ -180,7 +180,7 @@ are partitioned.
 Laparoscopy is where the diagnosis is confirmed, and it is the modality closest to
 our task. Most published work uses transfer learning with ImageNet-pretrained
 convolutional networks on the GLENDA dataset [ref_a4], either classifying frames as
-pathological or not [ref_a2] and, in a preprint, [ref_a5], or localizing lesions
+pathological or not — [ref_a2], and [ref_a5] in a preprint — or localizing lesions
 with region-based detectors such as Faster R-CNN and Mask R-CNN [ref_a3]. Related
 work on comparable laparoscopic collections reports similar pipelines without
 naming a public dataset [ref_a7]. Detector
@@ -399,10 +399,14 @@ informative, but it assumes independent pairs and therefore ignores the clusteri
 we label it frame-level and do not use it to support claims. *p*-values are
 Holm-corrected within each pre-specified family, and raw values are reported too,
 since an uncorrected interval excluding zero can sit beside a corrected *p* above
-0.05. The families are: the three pairwise classification comparisons; the six
-pairwise localization comparisons; the eight localization-versus-reference
-comparisons; and the eight comparisons of Pointing Game and Coverage against
-chance.
+0.05. The families are: the three pairwise classification comparisons; the three
+within-fold classification comparisons; the six pairwise localization
+comparisons; the eight localization-versus-reference comparisons; and the eight
+comparisons of Pointing Game and Coverage against chance. The two classification
+families are corrected separately, not jointly across six, because they are not
+six hypotheses: they are the same three, tested two ways on the same
+predictions. Correcting across both would penalise us for having checked our own
+assumption.
 
 Training used cross-entropy loss without class weighting — the subset is balanced —
 and Adam with its torchvision defaults apart from the learning rate; scores are the
@@ -496,9 +500,12 @@ Intervals are per-comparison and uncorrected, while *p*-values are Holm-correcte
 within each pre-specified family of tests. Both raw and corrected *p*-values are
 given, because an uncorrected interval that excludes zero can accompany a corrected
 *p* above 0.05, and the two are then easy to misread as contradictory. The families
-are: the three pairwise classification comparisons; the six pairwise localization
+are: the three pairwise classification comparisons; the three within-fold
+classification comparisons; the six pairwise localization
 comparisons; the eight comparisons of localization against a reference level; and
-the eight comparisons of Pointing Game and Coverage against chance.
+the eight comparisons of Pointing Game and Coverage against chance. The two
+classification families are corrected separately because they test the same three
+hypotheses two ways rather than six hypotheses once.
 
 ### Classification performance
 
@@ -862,8 +869,10 @@ remains to be tried.
 
 Three evaluation protocols on the same data and the same architectures produced
 two different orderings, and the one that differs is the one with the grouping
-mistake. A single case-wise split and a cross-validation grouped by recording both
-rank ResNet50 first and EfficientNet-B0 last; a cross-validation that treated each
+mistake. A single case-wise split and the pooled analysis of the cross-validation
+grouped by recording both rank ResNet50 first and EfficientNet-B0 last — a first
+place that Section 4.3 shows belongs to the pooled summary rather than to the
+data, since comparing inside folds does not support it; a cross-validation that treated each
 no-pathology segment folder as a unit puts EfficientNet-B0 first. The effect of
 that single choice is larger than any difference we can establish between
 architectures.

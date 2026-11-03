@@ -125,10 +125,14 @@ informative, but it assumes independent pairs and therefore ignores the clusteri
 we label it frame-level and do not use it to support claims. *p*-values are
 Holm-corrected within each pre-specified family, and raw values are reported too,
 since an uncorrected interval excluding zero can sit beside a corrected *p* above
-0.05. The families are: the three pairwise classification comparisons; the six
-pairwise localization comparisons; the eight localization-versus-reference
-comparisons; and the eight comparisons of Pointing Game and Coverage against
-chance.
+0.05. The families are: the three pairwise classification comparisons; the three
+within-fold classification comparisons; the six pairwise localization
+comparisons; the eight localization-versus-reference comparisons; and the eight
+comparisons of Pointing Game and Coverage against chance. The two classification
+families are corrected separately, not jointly across six, because they are not
+six hypotheses: they are the same three, tested two ways on the same
+predictions. Correcting across both would penalise us for having checked our own
+assumption.
 
 Training used cross-entropy loss without class weighting — the subset is balanced —
 and Adam with its torchvision defaults apart from the learning rate; scores are the

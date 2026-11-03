@@ -35,8 +35,8 @@ decision support has something to offer.
 Deep learning has been applied to this problem from several directions.
 Convolutional networks pretrained on natural images have been fine-tuned to
 classify laparoscopic frames as pathological or not [ref_a2], [ref_a7] and, in a
-preprint, [ref_a5],
-region-based detectors have been used to localize lesions [ref_a3], [ref_a6], and
+preprint, [ref_a5].
+Region-based detectors have been used to localize lesions [ref_a3], [ref_a6], and
 work has begun on recognition during live procedures [ref_a10]. Most of this work
 uses GLENDA, the public gynecologic laparoscopy dataset, which provides
 expert-annotated lesion masks alongside frame labels [ref_a4]. Vision transformers

@@ -70,8 +70,10 @@ remains to be tried.
 
 Three evaluation protocols on the same data and the same architectures produced
 two different orderings, and the one that differs is the one with the grouping
-mistake. A single case-wise split and a cross-validation grouped by recording both
-rank ResNet50 first and EfficientNet-B0 last; a cross-validation that treated each
+mistake. A single case-wise split and the pooled analysis of the cross-validation
+grouped by recording both rank ResNet50 first and EfficientNet-B0 last — a first
+place that Section 4.3 shows belongs to the pooled summary rather than to the
+data, since comparing inside folds does not support it; a cross-validation that treated each
 no-pathology segment folder as a unit puts EfficientNet-B0 first. The effect of
 that single choice is larger than any difference we can establish between
 architectures.

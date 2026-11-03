@@ -19,7 +19,7 @@ are partitioned.
 Laparoscopy is where the diagnosis is confirmed, and it is the modality closest to
 our task. Most published work uses transfer learning with ImageNet-pretrained
 convolutional networks on the GLENDA dataset [ref_a4], either classifying frames as
-pathological or not [ref_a2] and, in a preprint, [ref_a5], or localizing lesions
+pathological or not — [ref_a2], and [ref_a5] in a preprint — or localizing lesions
 with region-based detectors such as Faster R-CNN and Mask R-CNN [ref_a3]. Related
 work on comparable laparoscopic collections reports similar pipelines without
 naming a public dataset [ref_a7]. Detector

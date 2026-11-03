@@ -16,9 +16,12 @@ Intervals are per-comparison and uncorrected, while *p*-values are Holm-correcte
 within each pre-specified family of tests. Both raw and corrected *p*-values are
 given, because an uncorrected interval that excludes zero can accompany a corrected
 *p* above 0.05, and the two are then easy to misread as contradictory. The families
-are: the three pairwise classification comparisons; the six pairwise localization
+are: the three pairwise classification comparisons; the three within-fold
+classification comparisons; the six pairwise localization
 comparisons; the eight comparisons of localization against a reference level; and
-the eight comparisons of Pointing Game and Coverage against chance.
+the eight comparisons of Pointing Game and Coverage against chance. The two
+classification families are corrected separately because they test the same three
+hypotheses two ways rather than six hypotheses once.
 
 ### Classification performance
 
