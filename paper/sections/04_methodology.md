@@ -42,7 +42,7 @@ to 66.4% — and this is accounted for in the choice of evaluation metric below.
 
 A preliminary experiment used a single case-wise 70/15/15 split (528 train, 111
 validation, 107 test frames) built by the same grouping rule. We report it in
-Section 4.3 as a comparison, not as a result.
+Section 4.4 as a comparison, not as a result.
 
 ### Models and training
 
@@ -89,6 +89,18 @@ between-fold variability and are not a second estimate of the same quantity.
 Pooling requires the five fold models' scores to be comparable on one scale, which
 we do not verify directly; the two summaries are therefore reported side by side
 rather than treated as interchangeable.
+
+Because that assumption is unverified, every pairwise classification comparison
+is repeated inside each fold, where only one fold's frames and one pair of fold
+models are ever ranked together and cross-fold score scale cannot enter.
+Surgeries are resampled within their own fold, separately by class, so that the
+fold structure and the clustering both survive the bootstrap and every resampled
+fold retains both classes. The five fold-level differences are averaged without
+weighting, each fold being one complete evaluation on its own disjoint set of
+surgeries; the frame-weighted mean is reported alongside as a check. This is a
+sensitivity analysis, not a replacement: the pooled comparison remains the
+pre-specified primary one, and Section 4.3 reports both whether or not they
+agree.
 
 ROC-AUC is treated as the primary metric because it does not depend on the fixed
 0.5 threshold, so changes in fold prevalence do not move it the way they move
@@ -167,7 +179,10 @@ every method, so its claimed area follows from the same rule rather than being
 matched to anything. It encodes the prior that lesions tend to appear mid-frame
 without looking at the image at all. Exceeding it is additional evidence for
 lesion-specific localization; failing to exceed it means a method has not been shown
-to do more than that prior.
+to do more than that prior. The width σ is a choice rather than a derived
+quantity, and a wider prior claims more of the frame and scores a higher IoU, so
+every comparison against it is repeated over σ from 0.15×224 to 0.40×224 and
+Section 4.5 reports whether any verdict depends on the width.
 
 Saliency maps are computed inside the cross-validation loop, immediately after each
 fold's model is evaluated and before it is discarded, so that all 373 pathology

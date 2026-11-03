@@ -38,7 +38,7 @@ saw its surgery.
 | ViT-B/16 | **0.830 ± 0.092** | **0.821 ± 0.177** | 0.859 ± 0.060 | **0.829 ± 0.101** | **0.925 ± 0.052** |
 | *Pooled out-of-fold (n = 746)* | | | | | |
 | ResNet50 | 0.812 | 0.786 | 0.858 | 0.821 | **0.900 [0.854–0.939]** |
-| EfficientNet-B0 | 0.761 | 0.712 | **0.877** | 0.786 | 0.852 [0.776–0.916] |
+| EfficientNet-B0 | 0.761 | 0.712 | **0.877** | 0.786 | 0.851 [0.776–0.916] |
 | ViT-B/16 | **0.827** | **0.810** | 0.855 | **0.832** | 0.896 [0.832–0.944] |
 
 The pooled ROC curves are shown in Fig. 4.
@@ -57,10 +57,10 @@ varies (0.751–0.989 across all fits), so prevalence is not the only source of
 variation. ROC-AUC is used as the primary metric because it is threshold-free;
 accuracy is reported for completeness and is not compared across folds.
 
-Because the evaluation set is balanced 1:1 while the source data are approximately
-1:36, the precision and accuracy values above describe behaviour on this balanced
-set only. They should not be read as the predictive values a deployed model would
-achieve at the prevalence of unselected laparoscopy frames.
+Because the evaluation set is balanced 1:1 while the source dataset is distributed
+at roughly 1:36, the precision and accuracy values above describe behaviour on
+this balanced set only. They are not the predictive values a deployed model would
+achieve, which would depend on a prevalence this study does not estimate.
 
 ### Do the architectures differ?
 
@@ -98,9 +98,64 @@ them, so counting each frame as independent evidence overstates what the data
 support; we report the
 surgery-level result.
 
-Taken together, this evaluation can establish only that ResNet50 outperforms
-EfficientNet-B0 on AUC. It does not establish an ordering among the three
-architectures, and with 122 surgeries it was unlikely to.
+On the pre-specified pooled analysis, then, this evaluation establishes one
+difference: ResNet50 over EfficientNet-B0 on AUC. The next subsection shows that
+even this one does not survive a change in how the folds are combined.
+
+### Does the aggregation rule decide the answer?
+
+Pooling ranks all 746 frames against one another, which assumes the five fold
+models place their scores on a common scale. Section 3.4 flagged that we do not
+verify this. Table 3 shows what the assumption costs each model, by setting the
+mean of the five fold-level AUCs beside the pooled figure.
+
+**Table 3.** AUC computed inside each fold, against the pooled figure. The last
+column is what pooling costs each model.
+
+| | fold 0 | fold 1 | fold 2 | fold 3 | fold 4 | mean | pooled | difference |
+|---|---|---|---|---|---|---|---|---|
+| ResNet50 | 0.936 | 0.985 | 0.834 | 0.960 | 0.798 | 0.903 | 0.900 | **−0.003** |
+| EfficientNet-B0 | 0.908 | 0.986 | 0.789 | 0.989 | 0.751 | 0.884 | 0.851 | −0.033 |
+| ViT-B/16 | 0.932 | 0.969 | 0.869 | 0.982 | 0.874 | 0.925 | 0.896 | −0.029 |
+
+The cost is not shared evenly. ResNet50 loses 0.003 AUC by being pooled, the
+other two lose ten times as much. A model whose five fold models disagree about
+what a score of 0.7 means loses rank information when their scores are mixed, and
+ResNet50 evidently suffers least from that. This is a property of score
+comparability rather than of separating endometriosis from healthy tissue, and it
+pushes the pooled comparison toward ResNet50 for a reason unrelated to the task.
+
+Computing each pairwise difference inside each fold removes the effect, because
+two models are then only ever compared on one fold's frames, scored by one pair of
+models. Surgeries are resampled within their own fold, separately by class, so
+both the clustering and the fold structure survive the bootstrap; the five
+fold-level differences are then averaged unweighted, each fold being one complete
+evaluation on its own disjoint set of surgeries.
+
+**Table 4.** The same three comparisons, computed inside each fold. Holm
+correction is applied within the family of three, as for Table 2.
+
+| Comparison (A vs B) | Mean ΔAUC [95% CI] | *p* raw / Holm | A ahead in | Pooled ΔAUC (Table 2) |
+|---|---|---|---|---|
+| ResNet50 vs EfficientNet-B0 | +0.018 [−0.007, +0.047] | 0.17 / 0.17 | 3 / 5 folds | +0.048, Holm 0.030 |
+| ResNet50 vs ViT-B/16 | −0.023 [−0.045, −0.001] | 0.042 / 0.084 | 2 / 5 folds | +0.004, Holm 0.87 |
+| EfficientNet-B0 vs ViT-B/16 | **−0.041 [−0.072, −0.014]** | 0.0022 / **0.0066** | 2 / 5 folds | −0.044, Holm 0.058 |
+
+The two analyses do not agree about which comparison the data support. Pooling
+establishes ResNet50 over EfficientNet-B0 and leaves EfficientNet-B0 against
+ViT-B/16 inconclusive; working inside folds does the reverse, leaving ResNet50
+over EfficientNet-B0 unsupported (*p* = 0.17, and ResNet50 ahead in only three
+folds of five) and establishing ViT-B/16 over EfficientNet-B0. Weighting the fold
+differences by fold size rather than equally changes none of the three verdicts.
+
+We report the pooled analysis as the primary one because it was pre-specified,
+and we do not promote the within-fold analysis in its place after seeing which
+answer it gives. The honest reading is that neither is privileged by the data:
+the one classification difference this study can establish depends on a choice
+made by the analyst, which is the same conclusion the next subsection reaches
+about the grouping rule. Classification comparisons at this sample size are not
+robust enough to order these three architectures. The localization comparisons
+reported in Section 4.5 are, and that asymmetry is the point of the paper.
 
 ### Sensitivity to the protocol
 
@@ -147,9 +202,10 @@ normalised and thresholded exactly as a saliency map is, provides a competing
 baseline: it encodes the prior that lesions tend to lie mid-frame without looking at
 the image at all, and scores IoU 0.135, Pointing Game 0.274 and Coverage 0.119.
 
-Fig. 5 plots these values against the two reference levels.
+Table 5 reports each method against the masks, and Fig. 5 plots those values
+against the two reference levels.
 
-**Table 3.** Localization against the expert masks (373 out-of-fold frames, 102
+**Table 5.** Localization against the expert masks (373 out-of-fold frames, 102
 surgeries), with 95% surgery-level intervals.
 
 | | IoU | Pointing Game | Coverage |
@@ -163,14 +219,14 @@ surgeries), with 95% surgery-level intervals.
 
 Unlike the classification comparisons, the differences between methods are large
 relative to their uncertainty. All six pairwise IoU differences are significant
-after Holm correction within that family; Table 4a lists four of them, the two
+after Holm correction within that family; Table 6 lists four of them, the two
 omitted being ResNet50 and EfficientNet-B0 against attention rollout (+0.114 and
 +0.142, both *p* = 0.0006): EfficientNet-B0 exceeds
 ResNet50 by 0.029 (*p* = 0.004), both CNNs exceed ViT-B/16 by 0.088 and 0.117
 (*p* = 0.0006), and ViT-B/16's Grad-CAM exceeds its own attention rollout by 0.026
 (*p* = 0.0006).
 
-**Table 4a.** Mean IoU differences between methods (family of six, Holm-corrected).
+**Table 6.** Mean IoU differences between methods (family of six, Holm-corrected).
 
 | Comparison | ΔIoU [95% CI] | *p* |
 |---|---|---|
@@ -179,7 +235,7 @@ ResNet50 by 0.029 (*p* = 0.004), both CNNs exceed ViT-B/16 by 0.088 and 0.117
 | EfficientNet-B0 − ViT-B/16 (Grad-CAM) | +0.117 [+0.096, +0.140] | 0.0006 |
 | ViT-B/16: Grad-CAM − attention rollout | +0.026 [+0.019, +0.033] | 0.0006 |
 
-**Table 4b.** Each method against the two reference levels (family of eight,
+**Table 7.** Each method against the two reference levels (family of eight,
 Holm-corrected).
 
 | Method | vs area-matched random | vs centred Gaussian |
@@ -189,7 +245,8 @@ Holm-corrected).
 | ViT-B/16, Grad-CAM | +0.002 [−0.003, +0.006], *p* = 0.80 | −0.095 [−0.115, −0.077], *p* = 0.0008 |
 | ViT-B/16, rollout | −0.015 [−0.019, −0.011], *p* = 0.0008 | −0.121 [−0.140, −0.103], *p* = 0.0008 |
 
-Pointing Game and Coverage were tested against their analytic chance level in a
+Table 7 sets each method against both reference levels on IoU. Pointing Game and
+Coverage were tested against their analytic chance level in a
 separate family of eight. Both CNNs exceed chance on both measures (ResNet50 +0.199
 and +0.096; EfficientNet-B0 +0.215 and +0.081; all *p* = 0.0008). ViT-B/16's
 Grad-CAM does not differ from chance on either (+0.006, *p* = 1.00; −0.002,
@@ -204,20 +261,38 @@ and its Pointing Game point estimate sits on the baseline's (0.271 against
 Grad-CAM maps are indistinguishable from chance on every measure we tested. Third,
 attention rollout does not rescue the transformer: it is worse than ViT-B/16's own
 Grad-CAM and falls below the random floor on IoU and below chance on Coverage. The
-failure is therefore not an artefact of applying a CNN-oriented method to a
-transformer, though it does not exclude the possibility that some other attribution
-method would do better.
+result therefore does not depend on which of these two methods is used, but the
+two are not a sample of the available methods. Vanilla rollout is class-agnostic,
+aggregating attention flow without reference to the predicted class, so a diffuse
+map is consistent with how it is known to behave; we cannot conclude that no
+attribution method would find lesion-aligned structure in ViT-B/16.
+
+The width of the centred Gaussian is the one number in this comparison that we
+chose rather than derived, and a wider prior claims more area and scores a higher
+IoU. Sweeping it from σ = 0.15 × 224 to 0.40 × 224, over which the thresholded
+prior grows from 9.8% to 50.5% of the frame, leaves all four verdicts unchanged
+at every width: EfficientNet-B0 stays above the prior (Holm *p* ≤ 0.0104),
+ResNet50 stays level with it (Holm *p* between 0.25 and 0.97), and both ViT-B/16
+methods stay below it. The prior's own IoU peaks near σ = 0.20 × 224 at 0.136,
+marginally above the 0.135 it scores at the σ = 0.25 × 224 we report, so the
+baseline we set is close to the most demanding version of itself. The sweep is
+released as `results/centre_prior_sigma.csv`.
 
 Fig. 6 shows frames at the best, median and worst of EfficientNet-B0's IoU
 distribution. The CNN maps concentrate on a connected region near the lesion even in
 the median case, while both ViT-B/16 maps scatter across unrelated tissue and
 instrument surfaces.
 
-Read with Table 2, these results separate two properties that are often assumed to
-travel together. The evaluation found no evidence that ViT-B/16 classifies worse
-than ResNet50, yet its explanations are indistinguishable from chance, while
-EfficientNet-B0 — the one model this evaluation does place below another on AUC —
-is also the only one whose explanations exceed a centre-of-image baseline.
+Read with Tables 2 and 4, these results separate two properties that are often
+assumed to travel together. ViT-B/16 is never placed below another architecture
+on AUC under either aggregation, and under one of them it is the only model
+established as better than another — yet its explanations are indistinguishable
+from chance on all three measures. EfficientNet-B0 is the model both analyses
+place at the bottom on AUC, and it is the only one whose explanations exceed a
+centre-of-image baseline. The disagreement between the two aggregations is
+itself part of the contrast: the classification ordering moved when we changed
+how the folds were combined, while the localization ordering held across three
+measures, six pairwise comparisons and the full range of prior widths.
 
 ### Where the errors concentrate
 

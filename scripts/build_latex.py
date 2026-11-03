@@ -88,14 +88,17 @@ SECTION_LABELS = {
     "08_conclusion": "sec:conclusion",
 }
 
-# "Section 4.3" and the like, written before the subsections had labels
+# "Section 4.4" and the like, written before the subsections had labels. Both
+# dicts follow the order of the subsections in 05_results.md; adding one there
+# shifts every number after it, so these are the two places to update.
 SUBSECTION_REFS = {
-    "4.1": "sec:classification", "4.2": "sec:differ", "4.3": "sec:protocol",
-    "4.4": "sec:explanation", "4.5": "sec:errors",
+    "4.1": "sec:classification", "4.2": "sec:differ", "4.3": "sec:aggregation",
+    "4.4": "sec:protocol", "4.5": "sec:explanation", "4.6": "sec:errors",
 }
 SUBSECTION_LABELS = {
     "Classification performance": "sec:classification",
     "Do the architectures differ?": "sec:differ",
+    "Does the aggregation rule decide the answer?": "sec:aggregation",
     "Sensitivity to the protocol": "sec:protocol",
     "Explanation quality": "sec:explanation",
     "Where the errors concentrate": "sec:errors",
@@ -188,6 +191,16 @@ def inline(text: str) -> str:
                   lambda m: (r"Section~\ref{" + SECTION_ORDER[int(m.group(1)) - 1] + "}"
                              if 1 <= int(m.group(1)) <= len(SECTION_ORDER) else m.group(0)),
                   text)
+    # "Tables 2 and 4" first: the singular pattern below would not match the
+    # plural, and the reference would have stayed a bare number in the PDF.
+    def plural(match: re.Match) -> str:
+        a, b = match.group(1), match.group(2)
+        if a not in TABLE_LABELS or b not in TABLE_LABELS:
+            return match.group(0)
+        return (r"Tables~\ref{" + TABLE_LABELS[a] + r"} and~\ref{"
+                + TABLE_LABELS[b] + "}")
+
+    text = re.sub(r"Tables~?\s*(\d+[ab]?)\s+and\s+(\d+[ab]?)", plural, text)
     text = re.sub(r"Table~?\s*(\d+[ab]?)",
                   lambda m: (r"Table~\ref{" + TABLE_LABELS[m.group(1)] + "}"
                              if m.group(1) in TABLE_LABELS else m.group(0)), text)

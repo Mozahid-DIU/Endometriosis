@@ -2,18 +2,27 @@
 
 ### Two properties that do not travel together
 
-The central result is a dissociation. The evaluation found no evidence that
-ViT-B/16 classifies worse than ResNet50, yet ViT-B/16's saliency maps are
-indistinguishable from chance on all three localization measures. EfficientNet-B0
-is the one model this evaluation places below another on AUC, yet it is the only
-one whose maps exceed a centred-Gaussian baseline on IoU. Ranking by discrimination and
-ranking by explanation quality do not agree.
+The central result is a dissociation. ViT-B/16 is never placed below another
+architecture on AUC, and on the within-fold analysis it is the one model
+established as better than another — yet its saliency maps are indistinguishable
+from chance on all three localization measures. EfficientNet-B0 sits at the
+bottom on AUC under both aggregations, yet it is the only model whose maps exceed
+a centred-Gaussian baseline on IoU. Ranking by discrimination and ranking by
+explanation quality do not agree.
+
+The two rankings also differ in how firmly they are held. Which classification
+difference the data support changed when we changed how folds were aggregated,
+and changed again under a different grouping rule; the localization ordering held
+across three measures, six pairwise comparisons, and every width we gave the
+centre prior. Where the architectures are concerned, this study is far more
+certain about which model explains well than about which model classifies well —
+the reverse of how such comparisons are usually reported.
 
 This matters because the two are routinely treated as one. A paper that reports a
 strong AUC and prints a few heat maps invites the reading that the model has
-learned the lesion. Our measurements show that the inference does not hold here: a model with no
-detectable disadvantage in discrimination produced maps with no detectable spatial
-signal.
+learned the lesion. Our measurements show that the inference does not hold here: a
+model with no detectable disadvantage in discrimination produced maps with no
+detectable spatial signal.
 
 One hypothesis fits both halves of the dissociation and the error analysis, and we
 state it as a hypothesis because our experiments do not test it. The errors cluster
@@ -101,9 +110,11 @@ recordings that differ in acquisition, not simply more frames.
 ### Clinical reading
 
 These results do not support clinical use, and we make no such claim. Three limits
-are decisive. The evaluation set is balanced 1:1 while unselected laparoscopy
-frames are closer to 1:36, so the precision reported here is an artefact of the
-evaluation design and would fall substantially at realistic prevalence. We did not
+are decisive. The evaluation set is balanced 1:1, while the source dataset is
+distributed at roughly 1:36; what prevalence a prospective deployment would meet
+is unknown, and nothing here estimates it. The precision reported above is
+therefore a property of the evaluation design rather than a predictive value, and
+it would fall at any prevalence lower than the one we imposed. We did not
 assess calibration or decision utility, so the predicted probabilities should not
 be read as risk estimates. And the task as posed — a still frame labelled
 endometriosis or not — is not the clinical task, in which a surgeon integrates

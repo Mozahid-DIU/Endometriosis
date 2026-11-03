@@ -45,6 +45,12 @@ N_BOOT = 10_000
 SEED = 42
 ALPHA = 0.05
 
+# The CSV keeps six decimals although the manuscript prints three. Storing four
+# had already cost one number its last digit: EfficientNet-B0's pooled AUC is
+# 0.851462, which was saved as 0.8515 and then rounded a second time into the
+# text as 0.852. Rounding once, at the point of printing, is the only way to be
+# sure the figures and the prose agree with the predictions.
+
 
 
 def group_key(row: dict) -> str:
@@ -130,8 +136,8 @@ def classification() -> list[list]:
         widen = (g_hi - g_lo) / (f_hi - f_lo)
         print(f"{m:16s} AUC {point:.4f}  frame [{f_lo:.3f}-{f_hi:.3f}]  "
               f"surgery [{g_lo:.3f}-{g_hi:.3f}]  ({widen:.1f}x wider)")
-        out.append(["auc_ci", m, "", f"{point:.4f}", f"{f_lo:.4f}", f"{f_hi:.4f}",
-                    f"{g_lo:.4f}", f"{g_hi:.4f}", "", ""])
+        out.append(["auc_ci", m, "", f"{point:.6f}", f"{f_lo:.6f}", f"{f_hi:.6f}",
+                    f"{g_lo:.6f}", f"{g_hi:.6f}", "", ""])
 
     print("\n=== paired differences, surgery-level resampling, Holm-corrected ===")
     pairs = list(combinations(MODELS, 2))
@@ -173,7 +179,7 @@ def classification() -> list[list]:
               f"p_raw={p_acc_raw:.4g}  p_holm={p_acc:.4g}   (surgery-level)")
         print(f"    discordant frames {only_a}/{only_b}, McNemar p={p_mc_raw:.4g} "
               f"(frame-level, ignores clustering)")
-        out.append(["pairwise", a, b, f"{observed:+.4f}", "", "", f"{lo:+.4f}", f"{hi:+.4f}",
+        out.append(["pairwise", a, b, f"{observed:+.6f}", "", "", f"{lo:+.6f}", f"{hi:+.6f}",
                     f"{only_a}/{only_b}; McNemar frame-level p={p_mc_raw:.4g}",
                     f"dAcc {acc_diff:+.4f} [{acc_lo:+.4f},{acc_hi:+.4f}] "
                     f"raw={p_acc_raw:.4g} holm={p_acc:.4g}; "

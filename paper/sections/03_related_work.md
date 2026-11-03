@@ -35,7 +35,7 @@ contains 373 pathology frames against 13,438 no-pathology frames, a ratio of
 roughly 1:36, so a model that never predicts the positive class already scores 97%
 accuracy. Studies that report accuracy on the imbalanced set and studies that
 rebalance it are therefore not measuring the same thing. Our own results
-(Section 4.3) show that the partitioning choice alone can reorder three
+(Section 4.4) show that the partitioning choice alone can reorder three
 architectures on a single dataset, which suggests that cross-study comparisons of
 headline numbers should be treated with caution.
 
@@ -51,7 +51,7 @@ been developed for clinical use [ref_c2]. These modalities face a different
 constraint from ours: the lesion is harder to see, but acquisition is more
 standardised. Laparoscopy inverts that — the lesion is directly visible, while
 illumination, camera and surgical technique vary from recording to recording, which
-is exactly the variation our error analysis traces (Section 4.5).
+is exactly the variation our error analysis traces (Section 4.6).
 
 ### Transformers in surgical imaging
 
@@ -80,7 +80,7 @@ recall. What is essentially absent from this literature is any comparison of tho
 overlap figures against a chance level. Without such a reference an IoU figure
 cannot be interpreted: when lesions occupy a small fraction of the frame, a map
 that carries no spatial information still scores above zero, and a fixed
-centre-of-image prior can score higher than a model's map. Section 4.4 reports both
+centre-of-image prior can score higher than a model's map. Section 4.5 reports both
 references, and one of our models turns out not to exceed the simpler of them.
 
 ### What is missing

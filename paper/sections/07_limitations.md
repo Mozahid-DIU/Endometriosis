@@ -2,17 +2,40 @@
 
 **Scale and statistical power.** The balanced subset contains 746 frames from 122
 surgeries, which is what the public data allow. Because the resampling unit is the
-surgery, the effective sample size for every comparison is of that order, and only
-one classification difference survived correction. A study of this size can
-establish that explanation quality differs sharply between architectures; it cannot
-settle which of them classifies best. Larger multi-centre collections, or
-federated evaluation across institutions, would be needed for that.
+surgery, the effective sample size for every comparison is of that order, and at
+most one classification difference survived correction under either aggregation
+rule — a different one in each case. A study of this size can establish that
+explanation quality differs sharply between architectures; it cannot settle which
+of them classifies best. Larger multi-centre collections, or federated evaluation
+across institutions, would be needed for that.
+
+**How few recordings the negative class comes from.** The 122 surgeries are not
+evenly informative. The 373 pathology frames come from 102 distinct cases, but all
+373 no-pathology frames come from just 20 recordings. Everything the models could
+learn about healthy tissue — its illumination, its camera, its instruments, the
+way one surgeon moves — is therefore drawn from twenty examples, and our own error
+analysis finds the errors concentrating in particular no-pathology recordings
+rather than spreading out. The negative class is the binding constraint on
+generalization here, more than the frame count or the 122 figure suggests, and
+the most valuable additional data would be no-pathology recordings that differ in
+acquisition.
 
 **Evaluation on a balanced subset.** We rebalanced the data 1:1 so that accuracy
-and AUC would be informative, but the source distribution is roughly 1:36. The
-precision reported here is a property of the evaluation design and would fall at
-realistic prevalence; nothing in this study estimates the positive predictive value
-a deployed system would have.
+and precision would be interpretable; AUC does not require it, being
+threshold-free and insensitive to prevalence, and that is why we made AUC the
+primary metric. The source distribution is roughly 1:36, so the precision
+reported here is a property of the evaluation design; nothing in this study
+estimates the positive predictive value a deployed system would have, which would
+depend on a prevalence we do not know.
+
+**Which aggregation rule the comparison rests on.** Pooling out-of-fold
+predictions and comparing models inside each fold are both defensible, and they
+disagree here about which pairwise difference the data support (Section 4.3). We
+pre-specified pooling and report it as primary rather than selecting whichever
+analysis gives the cleaner result, but the honest summary is that this dataset
+does not determine a classification ordering. A reader who prefers the
+within-fold analysis should read the classification results as supporting
+ViT-B/16 over EfficientNet-B0 and nothing else.
 
 **Task definition.** Frames are labelled only as pathological or not. We do not
 distinguish lesion type, stage or severity, all of which matter clinically, and we

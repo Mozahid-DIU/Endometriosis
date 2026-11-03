@@ -51,7 +51,14 @@ AUTHORITATIVE = [
     "cv_summary.csv",
     "cv_pooled.csv",
     "iou_floor_validation.csv",
+    "within_fold_auc.csv",
+    "centre_prior_sigma.csv",
 ]
+
+# The manuscript contains sigma, Greek deltas and en dashes, and a Windows
+# console defaults to cp1252, which cannot encode them. Without this the checker
+# dies partway through printing a finding rather than reporting it.
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Numbers that are deliberately not results of the current run: the single split the
 # paper reports as history, the segment-grouped run it documents, and constants.
