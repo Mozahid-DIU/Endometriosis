@@ -92,12 +92,14 @@ Third, \textbf{leakage at the level of the surgery is easy to introduce and seld
 \label{sec:method}
 
 \subsection{Dataset}
+\label{sec:dataset}
 
 We use GLENDA v1.5 \cite{ref_a4}, a public dataset of frames extracted from gynecologic laparoscopy recordings. The v1.5 release contains 373 frames showing endometriosis, each with a pixel-level lesion mask drawn by medical experts, and 13,438 frames from recordings with no visible pathology \cite{ref_glenda_web}. The data are de-identified and publicly released under a CC BY-NC licence, so no additional ethical approval was required.
 
 The raw class ratio is approximately 1:36. Reporting accuracy on such a split is uninformative, since a model that never predicts the positive class already scores 97\%. We therefore construct a balanced subset: all 373 pathology frames, and 373 no-pathology frames drawn \textbf{round-robin across the 27 no-pathology segment folders}, which correspond to 20 distinct recordings once the segment suffix is stripped, so that no single recording dominates and consecutive, near-duplicate frames are avoided. Sampling uses a fixed seed (42) and is reproduced by the script released with this work.
 
 \subsection{Grouping and partitioning}
+\label{sec:grouping}
 
 The unit that must not be split is the surgery, not the frame. Frames from one recording share a patient, a camera, an illumination setting and often the same lesion, so allowing them into both training and test sets would let a model recognise the recording rather than the pathology, and would inflate every reported metric. Group identity is read from the filenames: pathology frames carry a case identifier (\texttt{c\_<id>}), and no-pathology frames carry a recording-and-segment identifier. GLENDA stores no-pathology frames in per-segment folders, so one recording can appear under several folder names; the segment suffix is stripped, since two segments of one recording are the same surgery. The balanced subset comprises 746 frames from 122 surgeries: 102 pathology cases and 20 no-pathology recordings.
 
@@ -106,6 +108,7 @@ Partitioning uses \texttt{StratifiedGroupKFold} with five folds, which keeps who
 A preliminary experiment used a single case-wise 70/15/15 split (528 train, 111 validation, 107 test frames) built by the same grouping rule. We report it in Section~\ref{sec:protocol} as a comparison, not as a result.
 
 \subsection{Models and training}
+\label{sec:models}
 
 Three ImageNet-pretrained architectures are compared, covering two convolutional designs of very different capacity and one transformer:
 
@@ -117,6 +120,7 @@ In each case the classification head is replaced by a two-unit linear layer and 
 All models are trained with Adam, batch size 32, for at most 30 epochs, with early stopping when validation ROC-AUC has not improved for six epochs; the weights of the best validation epoch are restored before testing. The learning rate is 1e-4 for the convolutional networks and 2e-5 for ViT-B/16, the transformer requiring the smaller step to fine-tune stably on a dataset of this size. Identical settings, seeds and schedules are used in all 15 fits (3 architectures $\times$ 5 folds). Seeds are fixed at 42 and offset by the fold index, and cuDNN is restricted to deterministic algorithms so that a re-run reproduces the reported numbers. Training ran on a single Tesla T4 GPU in Google Colab.
 
 \subsection{Evaluation}
+\label{sec:evaluation}
 
 Endometriosis is the positive class throughout. We report accuracy, precision, recall, F1 and ROC-AUC. Results are summarised in two ways: as the mean and standard deviation of the five fold-level values, and as \textbf{pooled out-of-fold} metrics, in which the predictions of all five folds are concatenated and each metric is computed once over the resulting 746 frames. Pooling is possible because every frame is predicted exactly once, by the model that never saw its surgery; it yields one estimate over the whole dataset instead of an average of five estimates over fifths of it.
 
@@ -127,6 +131,7 @@ Because that assumption is unverified, every pairwise classification comparison 
 ROC-AUC is treated as the primary metric because it does not depend on the fixed 0.5 threshold, so changes in fold prevalence do not move it the way they move accuracy and precision. Fold-level AUC still varies with case mix, and we do not claim it is invariant across folds.
 
 \subsection{Statistical analysis}
+\label{sec:statistics}
 
 All intervals are 95\% percentile bootstrap intervals from 10,000 resamples, and all tests are two-sided. \textbf{The resampling unit is the surgery, not the frame.} Frames within a recording are correlated, so resampling frames would count repeated views of one case as independent evidence; since the inference of interest is to new surgeries, whole groups are resampled, with pathology and no-pathology groups drawn separately so that both classes are present in every resample. For reference, we also report how much narrower the frame-level intervals would have been.
 
@@ -135,6 +140,7 @@ Architectures are compared pairwise on the pooled out-of-fold predictions with t
 Training used cross-entropy loss without class weighting --- the subset is balanced --- and Adam with its torchvision defaults apart from the learning rate; scores are the softmax probability of the positive class. The validation set inside each fold is drawn with the same \texttt{StratifiedGroupKFold} splitter and seed as the outer loop, taking the first split of the training portion, which yields 92 to 124 frames depending on the fold.
 
 \subsection{Explainability}
+\label{sec:explainability}
 
 Classification metrics say whether a model is right; they say nothing about whether it is right for the right reason. GLENDA's expert masks allow the second question to be asked quantitatively, by comparing each model's saliency map with the annotated lesion.
 
@@ -148,6 +154,7 @@ These numbers are meaningless without a reference, because lesions occupy only 7
 Saliency maps are computed inside the cross-validation loop, immediately after each fold's model is evaluated and before it is discarded, so that all 373 pathology frames are scored by the same models that produced the classification results, each on data from surgeries it never saw.
 
 \subsection{Reproducibility}
+\label{sec:reproducibility}
 
 The dataset-construction script, the training and evaluation notebook, the split manifest, the per-image predictions and saliency scores, and every analysis and figure script are released at \texttt{github.com/Mozahid-DIU/Endometriosis}. Each run records a hash of its frame-to-fold assignment, so results computed under different groupings cannot be combined by accident. Seeds are fixed and cuDNN is restricted to deterministic algorithms, which makes a re-run reproducible \textbf{within the tested environment} (Google Colab, Tesla T4, PyTorch 2.x); we do not claim bitwise reproducibility on other hardware or library versions.
 
@@ -244,7 +251,7 @@ On the pre-specified pooled analysis, then, this evaluation establishes one diff
 \subsection{Does the aggregation rule decide the answer?}
 \label{sec:aggregation}
 
-Pooling ranks all 746 frames against one another, which assumes the five fold models place their scores on a common scale. Section~\ref{sec:results} flagged that we do not verify this. Table~\ref{tab:3} shows what the assumption costs each model, by setting the mean of the five fold-level AUCs beside the pooled figure.
+Pooling ranks all 746 frames against one another, which assumes the five fold models place their scores on a common scale. Section~\ref{sec:evaluation} flagged that we do not verify this. Table~\ref{tab:3} shows what the assumption costs each model, by setting the mean of the five fold-level AUCs beside the pooled figure.
 
 \begin{table}[t]
 \centering
@@ -293,7 +300,7 @@ We report the pooled analysis as the primary one because it was pre-specified, a
 \subsection{Sensitivity to the protocol}
 \label{sec:protocol}
 
-The ordering of the three models is not stable across evaluation protocols. A single case-wise held-out split of 107 frames --- the protocol common in this literature --- ranked them ResNet50 (AUC 0.915), ViT-B/16 (0.860), EfficientNet-B0 (0.833). Grouped cross-validation gives ResNet50 0.900, ViT-B/16 0.896 and EfficientNet-B0 0.852 pooled: ViT-B/16 moves from clearly second to indistinguishable from first, and the apparent 0.08 gap between ResNet50 and EfficientNet-B0 narrows to 0.048. Fig.~\ref{fig:cvauc} places the single-split value beside the five fold-level values for each model; ViT-B/16's single-split estimate falls below all five of its folds.
+The ordering of the three models is not stable across evaluation protocols. A single case-wise held-out split of 107 frames --- the protocol common in this literature --- ranked them ResNet50 (AUC 0.915), ViT-B/16 (0.860), EfficientNet-B0 (0.833). Grouped cross-validation gives ResNet50 0.900, ViT-B/16 0.896 and EfficientNet-B0 0.851 pooled: ViT-B/16 moves from clearly second to indistinguishable from first, and the apparent 0.08 gap between ResNet50 and EfficientNet-B0 narrows to 0.048. Fig.~\ref{fig:cvauc} places the single-split value beside the five fold-level values for each model; ViT-B/16's single-split estimate falls below all five of its folds.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_cv_auc.pdf}
@@ -309,7 +316,7 @@ The ordering of the three models is not stable across evaluation protocols. A si
 \label{fig:roc}
 \end{figure}
 
-A further ordering change arises from the grouping rule itself. GLENDA stores no-pathology frames in per-segment folders, and an earlier version of this analysis treated each folder as a group. Six of the twenty no-pathology recordings were thereby split into two or three groups, together accounting for 178 of the 373 no-pathology frames, and four of those six ended up with segments on both sides of a split. Under that grouping EfficientNet-B0 reached a pooled AUC of 0.913, the highest of the three; with the recording treated as one surgery it falls to 0.852 and is the lowest. We report the corrected grouping throughout and release the segment-grouped predictions alongside it, so that the size of the effect can be checked.
+A further ordering change arises from the grouping rule itself. GLENDA stores no-pathology frames in per-segment folders, and an earlier version of this analysis treated each folder as a group. Six of the twenty no-pathology recordings were thereby split into two or three groups, together accounting for 178 of the 373 no-pathology frames, and four of those six ended up with segments on both sides of a split. Under that grouping EfficientNet-B0 reached a pooled AUC of 0.913, the highest of the three; with the recording treated as one surgery it falls to 0.851 and is the lowest. We report the corrected grouping throughout and release the segment-grouped predictions alongside it, so that the size of the effect can be checked.
 
 Taken together, the single split and the surgery-grouped cross-validation produce the same rank order, while the segment-grouped run reverses it, moving EfficientNet-B0 from last to first. We draw a claim about this dataset rather than about the literature: here, the ranking was more sensitive to the grouping rule than to the choice of architecture, which is a reason to state that rule explicitly and to prefer repeated evaluation over a single split at this sample size.
 
@@ -477,7 +484,7 @@ The explanation findings carry a specific warning for deployment. If a system di
 
 \textbf{What the explanation metrics measure.} IoU, Pointing Game and Coverage quantify spatial agreement between a saliency map and an expert mask. They do not establish faithfulness: a map that lands on the lesion does not prove the model used lesion evidence, and a map that does not may simply summarise the computation poorly. GLENDA provides one annotation per frame, so we cannot report inter-annotator variability or treat the mask as a range rather than a point. We also fixed the map threshold at 0.5 and used a single target layer per architecture; both choices affect the absolute numbers. The ordering of the two CNNs above both transformer methods is stable across all three metrics, but the two CNNs themselves change places on Coverage (ResNet50 0.168 against EfficientNet-B0 0.153) while IoU and Pointing Game put EfficientNet-B0 first. Only two explanation methods were tested, and the failure of attention rollout does not rule out gradient-weighted transformer attribution performing better.
 
-\textbf{Protocol dependencies.} Pooling out-of-fold predictions assumes the five fold models produce scores on comparable scales; we report the fold-wise summary beside the pooled one rather than verifying that assumption. Learning rates were set per architecture in advance rather than tuned per fold, which keeps the comparison simple but may not place each architecture at its best. Finally, the exact partition depends on the \texttt{StratifiedGroupKFold} implementation: running the same seed under a different scikit-learn version produced different folds, with prevalence ranging differently across them. We release the split manifest and a hash of the frame-to-fold assignment so that the reported numbers can be reproduced, but the folds themselves are not canonical.
+\textbf{Protocol dependencies.} We never verified that the five fold models place their scores on a comparable scale, which is what pooling assumes. The within-fold analysis shows how much that assumption moves the answer, but it does not establish the assumption, and the fold-level AUCs it rests on are each computed on 125 to 179 frames. Learning rates were set per architecture in advance rather than tuned per fold, which keeps the comparison simple but may not place each architecture at its best. Finally, the exact partition depends on the \texttt{StratifiedGroupKFold} implementation: running the same seed under a different scikit-learn version produced different folds, with prevalence ranging differently across them. We release the split manifest and a hash of the frame-to-fold assignment so that the reported numbers can be reproduced, but the folds themselves are not canonical.
 
 \textbf{Directions.} The error analysis points to recording-level appearance as the dominant source of failure, so the most useful next data are no-pathology recordings that differ in acquisition rather than more frames from the same ones. The dissociation we report invites a causal test: occluding the annotated lesion and measuring how much performance each architecture retains would show directly how much of each model's decision rests on the lesion rather than its surroundings.
 

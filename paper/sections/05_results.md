@@ -163,7 +163,7 @@ The ordering of the three models is not stable across evaluation protocols. A
 single case-wise held-out split of 107 frames — the protocol common in this
 literature — ranked them ResNet50 (AUC 0.915), ViT-B/16 (0.860), EfficientNet-B0
 (0.833). Grouped cross-validation gives ResNet50 0.900, ViT-B/16 0.896 and
-EfficientNet-B0 0.852 pooled: ViT-B/16 moves from clearly second to indistinguishable from first,
+EfficientNet-B0 0.851 pooled: ViT-B/16 moves from clearly second to indistinguishable from first,
 and the apparent 0.08 gap between ResNet50 and EfficientNet-B0 narrows to 0.048.
 Fig. 3 places the single-split value beside the five fold-level values for each
 model; ViT-B/16's single-split estimate falls below all five of its folds.
@@ -174,7 +174,7 @@ treated each folder as a group. Six of the twenty no-pathology recordings were
 thereby split into two or three groups, together accounting for 178 of the 373
 no-pathology frames, and four of those six ended up with segments on both sides of
 a split. Under that grouping EfficientNet-B0 reached a pooled AUC of 0.913, the
-highest of the three; with the recording treated as one surgery it falls to 0.852
+highest of the three; with the recording treated as one surgery it falls to 0.851
 and is the lowest. We report the corrected grouping throughout and release the
 segment-grouped predictions alongside it, so that the size of the effect can be
 checked.

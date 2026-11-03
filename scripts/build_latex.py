@@ -92,10 +92,20 @@ SECTION_LABELS = {
 # dicts follow the order of the subsections in 05_results.md; adding one there
 # shifts every number after it, so these are the two places to update.
 SUBSECTION_REFS = {
+    "3.1": "sec:dataset", "3.2": "sec:grouping", "3.3": "sec:models",
+    "3.4": "sec:evaluation", "3.5": "sec:statistics", "3.6": "sec:explainability",
+    "3.7": "sec:reproducibility",
     "4.1": "sec:classification", "4.2": "sec:differ", "4.3": "sec:aggregation",
     "4.4": "sec:protocol", "4.5": "sec:explanation", "4.6": "sec:errors",
 }
 SUBSECTION_LABELS = {
+    "Dataset": "sec:dataset",
+    "Grouping and partitioning": "sec:grouping",
+    "Models and training": "sec:models",
+    "Evaluation": "sec:evaluation",
+    "Statistical analysis": "sec:statistics",
+    "Explainability": "sec:explainability",
+    "Reproducibility": "sec:reproducibility",
     "Classification performance": "sec:classification",
     "Do the architectures differ?": "sec:differ",
     "Does the aggregation rule decide the answer?": "sec:aggregation",
@@ -184,9 +194,20 @@ def inline(text: str) -> str:
     text = re.sub(r"Fig\.~?\s*(\d)",
                   lambda m: (r"Fig.~\ref{" + FIGURE_NUMBER[m.group(1)] + "}"
                              if m.group(1) in FIGURE_NUMBER else m.group(0)), text)
-    text = re.sub(r"Section~?\s*(\d\.\d)",
-                  lambda m: r"Section~\ref{" + SUBSECTION_REFS.get(m.group(1), "sec:results") + "}",
-                  text)
+    def subsection(match: re.Match) -> str:
+        """An unknown number is left alone and reported.
+
+        Falling back to a default label was worse than doing nothing: a
+        reference to Section 3.4 silently became a reference to Section 4, and
+        the PDF read correctly enough that nobody would question it.
+        """
+        number = match.group(1)
+        if number not in SUBSECTION_REFS:
+            print(f"  WARNING: 'Section {number}' matches no subsection; left as text")
+            return match.group(0)
+        return r"Section~\ref{" + SUBSECTION_REFS[number] + "}"
+
+    text = re.sub(r"Section~?\s*(\d\.\d)", subsection, text)
     text = re.sub(r"Section~?\s*(\d)(?![\d.])",
                   lambda m: (r"Section~\ref{" + SECTION_ORDER[int(m.group(1)) - 1] + "}"
                              if 1 <= int(m.group(1)) <= len(SECTION_ORDER) else m.group(0)),

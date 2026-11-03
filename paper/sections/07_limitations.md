@@ -57,9 +57,11 @@ Pointing Game put EfficientNet-B0 first. Only two explanation methods were teste
 failure of attention rollout does not rule out gradient-weighted transformer
 attribution performing better.
 
-**Protocol dependencies.** Pooling out-of-fold predictions assumes the five fold
-models produce scores on comparable scales; we report the fold-wise summary beside
-the pooled one rather than verifying that assumption. Learning rates were set per
+**Protocol dependencies.** We never verified that the five fold models place
+their scores on a comparable scale, which is what pooling assumes. The
+within-fold analysis shows how much that assumption moves the answer, but it
+does not establish the assumption, and the fold-level AUCs it rests on are each
+computed on 125 to 179 frames. Learning rates were set per
 architecture in advance rather than tuned per fold, which keeps the comparison
 simple but may not place each architecture at its best. Finally, the exact
 partition depends on the `StratifiedGroupKFold` implementation: running the same

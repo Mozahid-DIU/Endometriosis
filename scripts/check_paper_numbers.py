@@ -18,6 +18,7 @@ Two design choices make the check meaningful rather than decorative:
 Reported:
 
   MISMATCH   a number in the text that matches nothing in the result files
+  SUPERSEDED a number that was right once and is not any more
   OVERCLAIM  a phrase that asserts more than the analysis established
   WEAKENED   a hedge that was in the source draft and has gone missing
 
@@ -79,6 +80,16 @@ EXTRA_KNOWN: dict[float, str] = {
     0.114: "ResNet50 minus rollout IoU (cv_localization_summary.csv)",
     0.142: "EfficientNet-B0 minus rollout IoU (cv_localization_summary.csv)",
 }
+
+# Values that were once in the manuscript and are now wrong. A superseded number
+# usually still resembles a real one, so the match-against-the-result-files test
+# can wave it through: 0.852 survived two passes that way, because somewhere in
+# 550 stored values something sat within half of the last printed digit. These
+# are checked by exact string, before any of that.
+SUPERSEDED: list[tuple[str, str]] = [
+    ("0.852", "EfficientNet-B0's pooled AUC is 0.851; 0.852 came of rounding "
+              "0.851462 to four decimals and then to three"),
+]
 
 OVERCLAIMS: list[tuple[str, str, str]] = [
     (r"\b(models?|architectures?)\s+(are|were|is|was)\s+(equal|equivalent|the same)\b",
@@ -165,6 +176,11 @@ def check_section(path: Path, known: set[float]) -> list[str]:
     problems: list[str] = []
 
     for line_no, line in enumerate(text.splitlines(), 1):
+        for stale, why in SUPERSEDED:
+            if stale in line:
+                problems.append(f"  SUPERSEDED line {line_no}: \"{stale}\" - {why}"
+                                f"\n      {line.strip()[:100]}")
+
         stripped = CROSS_REFERENCE.sub("", line)
         for value, places in decimals_in(stripped):
             if value in {0.5, 1.0, 2.0, 5.0}:        # thresholds, not measurements
