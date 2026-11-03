@@ -49,7 +49,21 @@ plt.rcParams.update({
     "figure.dpi": 300,
     "savefig.dpi": 300,
     "savefig.bbox": "tight",
+    # Type 3 fonts are not embeddable and journals reject them; 42 is TrueType.
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
 })
+
+
+def save(fig, out) -> None:
+    """Write both a PNG to look at and a PDF for the manuscript.
+
+    These six are line art, so the PDF is vector: sharper in print and a fraction
+    of the weight. The weight matters because pdfLaTeX re-embeds every image on
+    every pass, and Overleaf's free plan compiles against a timeout.
+    """
+    fig.savefig(out)
+    fig.savefig(out.with_suffix(".pdf"))
 
 
 
@@ -115,7 +129,7 @@ def figure_cv_auc() -> None:
     ax.set_xlabel("ROC-AUC")
     tidy(ax)
     out = RESULTS / "fig_cv_auc.png"
-    fig.savefig(out)
+    save(fig, out)
     plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
 
@@ -194,7 +208,7 @@ def figure_localization() -> None:
              fontsize=7.6, color=INK_SOFT, ha="left", va="top")
     fig.subplots_adjust(wspace=0.5)
     out = RESULTS / "fig_localization.png"
-    fig.savefig(out)
+    save(fig, out)
     plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
 
@@ -236,7 +250,7 @@ def figure_roc() -> None:
     tidy(ax)
     ax.yaxis.grid(True, color=GRID, linewidth=0.6, alpha=0.8)
     out = RESULTS / "fig_roc_pooled.png"
-    fig.savefig(out)
+    save(fig, out)
     plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
 
@@ -272,7 +286,7 @@ def figure_confusion() -> None:
         ax.tick_params(length=0)
     fig.subplots_adjust(wspace=0.45)
     out = RESULTS / "fig_confusion_pooled.png"
-    fig.savefig(out)
+    save(fig, out)
     plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
 
@@ -319,7 +333,7 @@ def figure_error_clusters() -> None:
                  f"{MIN_FRAMES} frames", fontsize=9, color=INK, loc="left", pad=34)
     tidy(ax)
     out = RESULTS / "fig_error_clusters.png"
-    fig.savefig(out)
+    save(fig, out)
     plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
 
@@ -361,7 +375,7 @@ def figure_dataset() -> None:
     ax.xaxis.grid(False)
     ax.yaxis.grid(True, color=GRID, linewidth=0.6, alpha=0.8)
     out = RESULTS / "fig_dataset_folds.png"
-    fig.savefig(out)
+    save(fig, out)
     plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}")
 

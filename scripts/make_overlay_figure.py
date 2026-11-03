@@ -102,6 +102,19 @@ def main() -> None:
              ha="center", fontsize=8, color=INK_SOFT)
     fig.subplots_adjust(wspace=0.04, hspace=0.06)
     fig.savefig(OUT, dpi=300, bbox_inches="tight")
+
+    # This one is photographic, unlike the six chart figures, so it stays raster
+    # and a PNG of it is 2.8 MB - heavy enough to matter, since pdfLaTeX embeds
+    # every image on every pass. JPEG at quality 92 with no chroma subsampling
+    # keeps the mask outlines and labels crisp at a quarter of the weight, and
+    # the manuscript includes this .jpg rather than the .png.
+    from PIL import Image
+
+    jpg = OUT.with_suffix(".jpg")
+    Image.open(OUT).convert("RGB").save(
+        jpg, "JPEG", quality=92, subsampling=0, dpi=(300, 300), optimize=True)
+    print(f"wrote {jpg.relative_to(ROOT)} "
+          f"({jpg.stat().st_size / 1024:.0f} KB, from {OUT.stat().st_size / 1024:.0f} KB)")
     plt.close(fig)
     print(f"wrote {OUT.relative_to(ROOT)}")
 

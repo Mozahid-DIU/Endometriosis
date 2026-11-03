@@ -195,7 +195,7 @@ All three models recall endometriosis frames at a similar rate (0.855--0.877) an
 Threshold-dependent metrics vary more across folds than ROC-AUC does. Fold prevalence is a likely contributor --- because whole surgeries are kept together, the share of pathology frames in a fold ranges from 37.8\% to 66.4\% (Fig.~\ref{fig:folds}), which moves where a fixed 0.5 threshold sits on the score distribution. Fold-level AUC also varies (0.751--0.989 across all fits), so prevalence is not the only source of variation. ROC-AUC is used as the primary metric because it is threshold-free; accuracy is reported for completeness and is not compared across folds.
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_dataset_folds.png}
+\includegraphics[width=\linewidth]{figures/fig_dataset_folds.pdf}
 \caption{Fold composition. Each bar is one cross-validation fold, split into endometriosis and no-pathology frames, with the pathology share and the number of surgeries above it. Because whole surgeries are kept together, prevalence varies from 37.8\% to 66.4\%, which is why ROC-AUC rather than accuracy is compared across folds.}
 \label{fig:folds}
 \end{figure}
@@ -203,7 +203,7 @@ Threshold-dependent metrics vary more across folds than ROC-AUC does. Fold preva
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_confusion_pooled.png}
+\includegraphics[width=\linewidth]{figures/fig_confusion_pooled.pdf}
 \caption{Pooled out-of-fold confusion matrices over all 746 frames, each predicted by the model that never saw its surgery. Cell shading is the row-normalised share; counts are given inside each cell.}
 \label{fig:confusion}
 \end{figure}
@@ -245,7 +245,7 @@ Taken together, this evaluation can establish only that ResNet50 outperforms Eff
 The ordering of the three models is not stable across evaluation protocols. A single case-wise held-out split of 107 frames --- the protocol common in this literature --- ranked them ResNet50 (AUC 0.915), ViT-B/16 (0.860), EfficientNet-B0 (0.833). Grouped cross-validation gives ResNet50 0.900, ViT-B/16 0.896 and EfficientNet-B0 0.852 pooled: ViT-B/16 moves from clearly second to indistinguishable from first, and the apparent 0.08 gap between ResNet50 and EfficientNet-B0 narrows to 0.048. Fig.~\ref{fig:cvauc} places the single-split value beside the five fold-level values for each model; ViT-B/16's single-split estimate falls below all five of its folds.
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_cv_auc.png}
+\includegraphics[width=\linewidth]{figures/fig_cv_auc.pdf}
 \caption{Classification performance per architecture. Small dots are the five fold-level AUCs, the open diamond is the earlier single-split estimate, and the filled marker with its bar is the pooled out-of-fold AUC with a 95\% surgery-level bootstrap interval.}
 \label{fig:cvauc}
 \end{figure}
@@ -253,7 +253,7 @@ The ordering of the three models is not stable across evaluation protocols. A si
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_roc_pooled.png}
+\includegraphics[width=\linewidth]{figures/fig_roc_pooled.pdf}
 \caption{Pooled out-of-fold ROC curves. Each curve aggregates the predictions of the five fold models, so every frame contributes once, scored by a model blind to its surgery. Intervals in the legend resample surgeries.}
 \label{fig:roc}
 \end{figure}
@@ -272,7 +272,7 @@ Lesions occupy 7.20\% of a frame on average (range 0.17--57.39\%), so a map carr
 Fig.~\ref{fig:localization} plots these values against the two reference levels.
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_localization.png}
+\includegraphics[width=\linewidth]{figures/fig_localization.pdf}
 \caption{Agreement between each saliency map and the expert lesion mask, over all 373 out-of-fold pathology frames. The vertical tick on each bar is that method's own area-matched random floor; the dashed line is a centred Gaussian baseline and the dotted line the chance level for the Pointing Game.}
 \label{fig:localization}
 \end{figure}
@@ -346,7 +346,7 @@ Three findings follow. First, both CNNs localize above chance on all three measu
 Fig.~\ref{fig:overlays} shows frames at the best, median and worst of EfficientNet-B0's IoU distribution. The CNN maps concentrate on a connected region near the lesion even in the median case, while both ViT-B/16 maps scatter across unrelated tissue and instrument surfaces.
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_overlays.png}
+\includegraphics[width=\linewidth]{figures/fig_overlays.jpg}
 \caption{Qualitative comparison on the best, median and worst frames of EfficientNet-B0's IoU distribution. Columns: frame with the expert mask, Grad-CAM for each architecture, and attention rollout for ViT-B/16. Maps shown here come from the preliminary single-split models and are illustrative; all reported numbers use the fold models.}
 \label{fig:overlays}
 \end{figure}
@@ -360,7 +360,7 @@ Read with Table~\ref{tab:2}, these results separate two properties that are ofte
 Errors are not spread evenly over the dataset. Of the surgeries contributing at least five frames, those with the highest misclassification rate are predominantly no-pathology recordings (Fig.~\ref{fig:errors}), where every model misclassifies a large share of the frames. The dominant failure mode is therefore a systematic false positive on healthy tissue in particular recordings rather than scattered errors or missed lesions. Since the folds are grouped by surgery these frames were never seen in training, so the clustering is not memorization; identifying what distinguishes these recordings --- illumination, tissue appearance, or camera and instrument differences --- would require recording-level analysis that we did not perform.
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_error_clusters.png}
+\includegraphics[width=\linewidth]{figures/fig_error_clusters.pdf}
 \caption{Per-surgery error rate for the twelve hardest surgeries among those contributing at least five frames. Errors concentrate in particular recordings rather than spreading across the dataset.}
 \label{fig:errors}
 \end{figure}

@@ -35,37 +35,37 @@ CORRESPONDING = r"\cortext[cor1]{Corresponding author: EMAIL}"
 # Figures in the order the manuscript cites them. Fig. N in the text maps to the
 # Nth entry here, so this list and the text must stay in step.
 FIGURES = [
-    ("fig_dataset_folds.png", "fig:folds",
+    ("fig_dataset_folds.pdf", "fig:folds",
      "Fold composition. Each bar is one cross-validation fold, split into "
      "endometriosis and no-pathology frames, with the pathology share and the "
      "number of surgeries above it. Because whole surgeries are kept together, "
      "prevalence varies from 37.8\\% to 66.4\\%, which is why ROC-AUC rather than "
      "accuracy is compared across folds."),
-    ("fig_confusion_pooled.png", "fig:confusion",
+    ("fig_confusion_pooled.pdf", "fig:confusion",
      "Pooled out-of-fold confusion matrices over all 746 frames, each predicted by "
      "the model that never saw its surgery. Cell shading is the row-normalised "
      "share; counts are given inside each cell."),
-    ("fig_cv_auc.png", "fig:cvauc",
+    ("fig_cv_auc.pdf", "fig:cvauc",
      "Classification performance per architecture. Small dots are the five "
      "fold-level AUCs, the open diamond is the earlier single-split estimate, and "
      "the filled marker with its bar is the pooled out-of-fold AUC with a 95\\% "
      "surgery-level bootstrap interval."),
-    ("fig_roc_pooled.png", "fig:roc",
+    ("fig_roc_pooled.pdf", "fig:roc",
      "Pooled out-of-fold ROC curves. Each curve aggregates the predictions of the "
      "five fold models, so every frame contributes once, scored by a model blind "
      "to its surgery. Intervals in the legend resample surgeries."),
-    ("fig_localization.png", "fig:localization",
+    ("fig_localization.pdf", "fig:localization",
      "Agreement between each saliency map and the expert lesion mask, over all 373 "
      "out-of-fold pathology frames. The vertical tick on each bar is that method's "
      "own area-matched random floor; the dashed line is a centred Gaussian "
      "baseline and the dotted line the chance level for the Pointing Game."),
-    ("fig_overlays.png", "fig:overlays",
+    ("fig_overlays.jpg", "fig:overlays",
      "Qualitative comparison on the best, median and worst frames of "
      "EfficientNet-B0's IoU distribution. Columns: frame with the expert mask, "
      "Grad-CAM for each architecture, and attention rollout for ViT-B/16. Maps "
      "shown here come from the preliminary single-split models and are "
      "illustrative; all reported numbers use the fold models."),
-    ("fig_error_clusters.png", "fig:errors",
+    ("fig_error_clusters.pdf", "fig:errors",
      "Per-surgery error rate for the twelve hardest surgeries among those "
      "contributing at least five frames. Errors concentrate in particular "
      "recordings rather than spreading across the dataset."),
@@ -423,10 +423,19 @@ def main() -> None:
 
     (OUT_DIR / "main.tex").write_text("\n".join(parts), encoding="utf-8")
     shutil.copy(ROOT / "paper" / "references.bib", OUT_DIR / "references.bib")
-    for filename, _, _ in FIGURES:
+    wanted = {filename for filename, _, _ in FIGURES}
+    for filename in wanted:
         src = RESULTS / filename
         if src.exists():
             shutil.copy(src, OUT_DIR / "figures" / filename)
+        else:
+            print(f"  WARNING: {filename} is missing from results/")
+    # Anything else here is from an earlier build - a figure that was renamed or
+    # changed format. LaTeX ignores it, but it still travels in the upload.
+    for stale in sorted(p for p in (OUT_DIR / "figures").iterdir()
+                        if p.is_file() and p.name not in wanted):
+        stale.unlink()
+        print(f"  removed stale figure {stale.name}")
 
     tex = (OUT_DIR / "main.tex").read_text(encoding="utf-8")
     print(f"wrote {(OUT_DIR / 'main.tex').relative_to(ROOT)}")
